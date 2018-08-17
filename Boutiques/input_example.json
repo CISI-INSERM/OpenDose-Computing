@@ -1,0 +1,7 @@
+{
+	"organid": 		95,
+	"particletype":	"gamma",
+	"energy":		1,
+	"nbprimaries":	1000,
+	"macfile":		"main.mac"
+}

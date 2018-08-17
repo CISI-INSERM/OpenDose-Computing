@@ -1,0 +1,99 @@
+{
+    "command-line": "Gate [FLAG] [Organ_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > [OUTPUT]", 
+    "container-image": {
+        "image": "user/image", 
+        "index": "docker://", 
+        "type": "docker"
+    }, 
+    "description": "tool description", 
+    "error-codes": [
+        {
+            "code": 1, 
+            "description": "Crashed"
+        }
+    ], 
+    "groups": [
+        {
+            "all-or-none": true, 
+            "id": "group1", 
+            "members": [
+                "organid", 
+                "particletype", 
+                "energy", 
+                "nbprimaries", 
+                "flag"
+            ], 
+            "mutually-exclusive": false, 
+            "name": "the param group", 
+            "one-is-required": false
+        }
+    ], 
+    "inputs": [
+        {
+            "id": "organid", 
+            "name": "Organ ID ref to the organs table", 
+            "optional": true, 
+            "type": "Number", 
+            "value-key": "[ORGANID]"
+        }, 
+        {
+            "id": "particletype", 
+            "name": "Type of Particle to simulate", 
+            "optional": true, 
+            "type": "String", 
+            "value-key": "[PARTICLETYPE]"
+        }, 
+        {
+            "id": "energy", 
+            "name": "The level of energy to simulate", 
+            "optional": true, 
+            "type": "Number", 
+            "value-key": "[ENERGY]"
+        }, 
+        {
+            "id": "nbprimaries", 
+            "name": "The number of primaries to simulate", 
+            "optional": true, 
+            "type": "Number", 
+            "value-key": "[NBPRIMARIES]"
+        }, 
+        {
+            "id": "macfile", 
+            "name": "The main macro file", 
+            "optional": false, 
+            "type": "File", 
+            "value-key": "[MACFILE]"
+        }, 
+        {
+            "command-line-flag": "-a", 
+            "id": "flag", 
+            "name": "The first flag", 
+            "optional": true, 
+            "type": "Flag", 
+            "value-key": "[FLAG]"
+        }
+    ], 
+	"output-files":[
+		{
+			"id" : "output",
+			"name" : "output",
+			"description" : "output of the command",
+			"path-template" : "outputlog.txt",
+			"optional": true,
+			"value-key" : "[OUTPUT]"
+		}
+	],
+    "name": "Gate CL for OpenDose", 
+    "schema-version": "0.5", 
+    "suggested-resources": {
+        "cpu-cores": 1, 
+        "ram": 1, 
+        "walltime-estimate": 60
+    }, 
+    "tags": {
+        "foo": "bar", 
+        "purpose": "testing", 
+        "status": "example"
+    }, 
+    "tool-version": "v0.1.0"
+}
