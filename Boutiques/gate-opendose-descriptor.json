@@ -1,5 +1,5 @@
 {
-    "command-line": "Gate [FLAG] [Organ_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > [OUTPUT]", 
+    "command-line": "unzip [GATERELEASE]; unzip [INPUTDATA]; Gate -a [Organ_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > [OUTPUTLOG];  tar -czcf [OUTPUTFOLDER].tar.gz ./output", 
     "container-image": {
         "image": "user/image", 
         "index": "docker://", 
@@ -12,75 +12,73 @@
             "description": "Crashed"
         }
     ], 
-    "groups": [
-        {
-            "all-or-none": true, 
-            "id": "group1", 
-            "members": [
-                "organid", 
-                "particletype", 
-                "energy", 
-                "nbprimaries", 
-                "flag"
-            ], 
-            "mutually-exclusive": false, 
-            "name": "the param group", 
-            "one-is-required": false
-        }
-    ], 
     "inputs": [
         {
+            "id": "gaterelease", 
+            "name": "LFN of the Gate Release used by the application", 
+            "optional": false, 
+            "type": "File", 
+            "value-key": "[GATERELEASE]"
+        },
+        {
+            "id": "inputdata", 
+            "name": "LFN of the archive containing all input data", 
+            "optional": false, 
+            "type": "File", 
+            "value-key": "[INPUTDATA]"
+        },
+		{
             "id": "organid", 
             "name": "Organ ID ref to the organs table", 
-            "optional": true, 
+            "optional": false, 
             "type": "Number", 
             "value-key": "[ORGANID]"
         }, 
         {
             "id": "particletype", 
             "name": "Type of Particle to simulate", 
-            "optional": true, 
+            "optional": false, 
             "type": "String", 
             "value-key": "[PARTICLETYPE]"
         }, 
         {
             "id": "energy", 
             "name": "The level of energy to simulate", 
-            "optional": true, 
+            "optional": false, 
             "type": "Number", 
             "value-key": "[ENERGY]"
         }, 
         {
             "id": "nbprimaries", 
             "name": "The number of primaries to simulate", 
-            "optional": true, 
+            "optional": false, 
             "type": "Number", 
             "value-key": "[NBPRIMARIES]"
         }, 
         {
             "id": "macfile", 
-            "name": "The main macro file", 
+            "name": "The name of the main macro file", 
             "optional": false, 
-            "type": "File", 
+            "type": "String", 
             "value-key": "[MACFILE]"
-        }, 
-        {
-            "command-line-flag": "-a", 
-            "id": "flag", 
-            "name": "The first flag", 
-            "optional": true, 
-            "type": "Flag", 
-            "value-key": "[FLAG]"
         }
     ], 
 	"output-files":[
 		{
-			"id" : "output",
-			"name" : "output",
-			"description" : "output of the command",
+			"id" : "outputlog",
+			"name" : "outputlog",
+			"description" : "output log of the command",
 			"path-template" : "outputlog.txt",
-			"optional": true,
-			"value-key" : "[OUTPUT]"
+			"optional": false,
+			"value-key" : "[OUTPUTLOG]"
+		},
+		{
+			"id" : "outputfolder",
+			"name" : "outputfolder",
+			"description" : "archive of the output folder containing execution results",
+			"path-template" : "output",
+			"optional": false,
+			"value-key" : "[OUTPUTFOLDER]"
 		}
 	],
     "name": "Gate CL for OpenDose", 

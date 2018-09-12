@@ -1,4 +1,6 @@
 {
+	"gaterelease":	"lfn://thisisthegatereleaselfn",
+	"inputdata":	"lfn://thisistheinputdatalfn",
 	"organid": 		95,
 	"particletype":	"gamma",
 	"energy":		1,
