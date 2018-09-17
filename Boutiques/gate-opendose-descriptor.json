@@ -1,5 +1,5 @@
 {
-    "command-line": "unzip [GATERELEASE]; unzip [INPUTDATA]; Gate -a [Organ_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > [OUTPUTLOG];  tar -czcf [OUTPUTFOLDER].tar.gz ./output", 
+    "command-line": "tar -zxf [GATERELEASE]; unzip [INPUTDATA]; Gate -a [Organ_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
     "container-image": {
         "image": "user/image", 
         "index": "docker://", 
@@ -65,20 +65,12 @@
     ], 
 	"output-files":[
 		{
-			"id" : "outputlog",
-			"name" : "outputlog",
-			"description" : "output log of the command",
-			"path-template" : "outputlog.txt",
+			"id" : "results",
+			"name" : "results",
+			"description" : "archive of the output folder containing execution results, and the output of the command",
+			"path-template" : "output.tar.gz",
 			"optional": false,
-			"value-key" : "[OUTPUTLOG]"
-		},
-		{
-			"id" : "outputfolder",
-			"name" : "outputfolder",
-			"description" : "archive of the output folder containing execution results",
-			"path-template" : "output",
-			"optional": false,
-			"value-key" : "[OUTPUTFOLDER]"
+			"value-key" : "[RESULTS]"
 		}
 	],
     "name": "Gate CL for OpenDose", 
