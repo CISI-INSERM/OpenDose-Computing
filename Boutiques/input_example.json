@@ -1,4 +1,5 @@
 {
+	"outputfilename": "OpenDose_Simu_organ_particle_energy.tar.gz",
 	"gaterelease":	"lfn://thisisthegatereleaselfn",
 	"inputdata":	"lfn://thisistheinputdatalfn",
 	"organid": 		95,

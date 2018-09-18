@@ -14,6 +14,13 @@
     ], 
     "inputs": [
         {
+            "id": "outputfilename", 
+            "name": "name of the output tar.gz file", 
+            "optional": false, 
+            "type": "String", 
+            "value-key": "[OUTPUTFILENAME]"
+        },
+        {
             "id": "gaterelease", 
             "name": "LFN of the Gate Release used by the application", 
             "optional": false, 
@@ -68,7 +75,7 @@
 			"id" : "results",
 			"name" : "results",
 			"description" : "archive of the output folder containing execution results, and the output of the command",
-			"path-template" : "output.tar.gz",
+			"path-template" : "[OUTPUTFILENAME]",
 			"optional": false,
 			"value-key" : "[RESULTS]"
 		}
