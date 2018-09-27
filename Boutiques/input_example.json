@@ -1,7 +1,7 @@
 {
-	"outputfilename": "OpenDose_Simu_organ_particle_energy.tar.gz",
+	"outfilename": "OpenDose_Simu_organ_particle_energy.tar.gz",
 	"gaterelease":	"lfn://thisisthegatereleaselfn",
-	"inputdata":	"lfn://thisistheinputdatalfn",
+	"indata":	"lfn://thisistheinputdatalfn",
 	"organid": 		95,
 	"particletype":	"gamma",
 	"energy":		1,

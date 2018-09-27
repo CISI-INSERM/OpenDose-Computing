@@ -1,10 +1,6 @@
 {
-    "command-line": "tar -zxf [GATERELEASE]; unzip [INPUTDATA]; Gate -a [Organ_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
-    "container-image": {
-        "image": "user/image", 
-        "index": "docker://", 
-        "type": "docker"
-    }, 
+    "command-line": "tar -zxf [GATERELEASE]; unzip [INDATA]; ./Gate -a [Organ_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
+
     "description": "tool description", 
     "error-codes": [
         {
@@ -14,11 +10,11 @@
     ], 
     "inputs": [
         {
-            "id": "outputfilename", 
+            "id": "outfilename", 
             "name": "name of the output tar.gz file", 
             "optional": false, 
             "type": "String", 
-            "value-key": "[OUTPUTFILENAME]"
+            "value-key": "[OUTFILENAME]"
         },
         {
             "id": "gaterelease", 
@@ -28,17 +24,17 @@
             "value-key": "[GATERELEASE]"
         },
         {
-            "id": "inputdata", 
+            "id": "indata", 
             "name": "LFN of the archive containing all input data", 
             "optional": false, 
             "type": "File", 
-            "value-key": "[INPUTDATA]"
+            "value-key": "[INDATA]"
         },
 		{
             "id": "organid", 
             "name": "Organ ID ref to the organs table", 
             "optional": false, 
-            "type": "Number", 
+            "type": "String", 
             "value-key": "[ORGANID]"
         }, 
         {
@@ -52,7 +48,7 @@
             "id": "energy", 
             "name": "The level of energy to simulate", 
             "optional": false, 
-            "type": "Number", 
+            "type": "String", 
             "value-key": "[ENERGY]"
         }, 
         {
@@ -75,7 +71,7 @@
 			"id" : "results",
 			"name" : "results",
 			"description" : "archive of the output folder containing execution results, and the output of the command",
-			"path-template" : "[OUTPUTFILENAME]",
+			"path-template" : "[OUTFILENAME]",
 			"optional": false,
 			"value-key" : "[RESULTS]"
 		}
