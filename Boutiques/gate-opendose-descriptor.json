@@ -55,7 +55,7 @@
             "id": "nbprimaries", 
             "name": "The number of primaries to simulate", 
             "optional": false, 
-            "type": "Number", 
+            "type": "String", 
             "value-key": "[NBPRIMARIES]"
         }, 
         {
