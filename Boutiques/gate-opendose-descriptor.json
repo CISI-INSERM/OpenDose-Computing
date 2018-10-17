@@ -1,5 +1,5 @@
 {
-    "command-line": "tar -zxf [GATERELEASE]; unzip [INDATA]; tar -zxvf gate_shared_libs.tar.gz; export G4ENSDFSTATEDATA=./G4ENSDFSTATE2.2; export G4LEDATA=./G4EMLOW7.3; ./Gate -a [Organ_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
+    "command-line": "tar -zxf [GATERELEASE]; unzip [INDATA]; tar -zxvf gate_shared_libs.tar.gz; export G4ENSDFSTATEDATA=./G4ENSDFSTATE2.2; export G4LEDATA=./G4EMLOW7.3; ./Gate -a [Source_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] ./mac/[MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
 
     "description": "tool description", 
     "error-codes": [
@@ -78,15 +78,5 @@
 	],
     "name": "GateCLforOpenDose", 
     "schema-version": "0.5", 
-    "suggested-resources": {
-        "cpu-cores": 1, 
-        "ram": 1, 
-        "walltime-estimate": 60
-    }, 
-    "tags": {
-        "foo": "bar", 
-        "purpose": "testing", 
-        "status": "example"
-    }, 
     "tool-version": "v0.1.0"
 }

@@ -2,9 +2,9 @@
 	"outfilename": "OpenDose_Simu_organ_particle_energy.tar.gz",
 	"gaterelease":	"lfn://thisisthegatereleaselfn",
 	"indata":	"lfn://thisistheinputdatalfn",
-	"organid": 		95,
+	"organid": 		"95",
 	"particletype":	"gamma",
-	"energy":		1,
-	"nbprimaries":	1000,
-	"macfile":		"main.mac"
+	"energy":		"1",
+	"nbprimaries":	"1000",
+	"macfile":		"main_AF.mac"
 }
