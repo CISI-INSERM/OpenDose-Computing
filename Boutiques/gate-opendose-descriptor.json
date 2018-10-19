@@ -1,5 +1,5 @@
 {
-    "command-line": "tar -zxf [GATERELEASE]; unzip [INDATA]; tar -zxvf gate_shared_libs.tar.gz; export G4ENSDFSTATEDATA=./G4ENSDFSTATE2.2; export G4LEDATA=./G4EMLOW7.3; ./Gate -a [Source_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] ./mac/[MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
+    "command-line": "tar -zxf [GATERELEASE]; unzip [INDATA]; tar -zxvf gate_shared_libs.tar.gz; export G4ENSDFSTATEDATA=./G4ENSDFSTATE2.2; export G4LEDATA=./G4EMLOW7.3; ./Gate -a [Source_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
 
     "description": "tool description", 
     "error-codes": [

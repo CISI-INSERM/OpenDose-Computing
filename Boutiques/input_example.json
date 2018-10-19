@@ -6,5 +6,5 @@
 	"particletype":	"gamma",
 	"energy":		"1",
 	"nbprimaries":	"1000",
-	"macfile":		"main_AF.mac"
+	"macfile":		"./mac/main_AF.mac"
 }
