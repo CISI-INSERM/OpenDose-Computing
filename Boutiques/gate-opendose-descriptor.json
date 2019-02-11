@@ -1,5 +1,5 @@
 {
-    "command-line": "tar -zxf [GATERELEASE]; unzip [INDATA]; tar -zxvf gate_shared_libs.tar.gz; export G4ENSDFSTATEDATA=./G4ENSDFSTATE2.2; export G4LEDATA=./G4EMLOW7.3; ./Gate -a [Source_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
+    "command-line": "unzip [INDATA]; source [GATERELEASEPATH]/env.sh [GATERELEASEPATH]; [GATERELEASEPATH]/shared_libs/ld-linux-x86-64.so.2 --library-path [GATERELEASEPATH]/root/lib:[GATERELEASEPATH]/shared_libs/ [GATERELEASEPATH]/Gate -a [Source_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
 
     "description": "tool description", 
     "error-codes": [
@@ -10,18 +10,13 @@
     ], 
     "inputs": [
         {
-            "id": "outfilename", 
-            "name": "name of the output tar.gz file", 
+            "id": "gatereleasepath", 
+            "name": "Path to the Gate Release used by the application", 
             "optional": false, 
             "type": "String", 
-            "value-key": "[OUTFILENAME]"
-        },
-        {
-            "id": "gaterelease", 
-            "name": "LFN of the Gate Release used by the application", 
-            "optional": false, 
-            "type": "File", 
-            "value-key": "[GATERELEASE]"
+			"command-line-flag": "",
+			"command-line-flag-separator": "",
+            "value-key": "[GATERELEASEPATH]"
         },
         {
             "id": "indata", 
@@ -35,6 +30,8 @@
             "name": "Organ ID ref to the organs table", 
             "optional": false, 
             "type": "String", 
+			"command-line-flag": "",
+			"command-line-flag-separator": "",
             "value-key": "[ORGANID]"
         }, 
         {
@@ -42,6 +39,8 @@
             "name": "Type of Particle to simulate", 
             "optional": false, 
             "type": "String", 
+			"command-line-flag": "",
+			"command-line-flag-separator": "",
             "value-key": "[PARTICLETYPE]"
         }, 
         {
@@ -49,6 +48,8 @@
             "name": "The level of energy to simulate", 
             "optional": false, 
             "type": "String", 
+			"command-line-flag": "",
+			"command-line-flag-separator": "",
             "value-key": "[ENERGY]"
         }, 
         {
@@ -56,6 +57,8 @@
             "name": "The number of primaries to simulate", 
             "optional": false, 
             "type": "String", 
+			"command-line-flag": "",
+			"command-line-flag-separator": "",
             "value-key": "[NBPRIMARIES]"
         }, 
         {
@@ -71,12 +74,12 @@
 			"id" : "results",
 			"name" : "results",
 			"description" : "archive of the output folder containing execution results, and the output of the command",
-			"path-template" : "[OUTFILENAME]",
+			"path-template" : "OpenDose_[ORGANID]_[PARTICLETYPE]_[ENERGY]_[NBPRIMARIES].tar.gz",
 			"optional": false,
 			"value-key" : "[RESULTS]"
 		}
 	],
     "name": "GateCLforOpenDose", 
     "schema-version": "0.5", 
-    "tool-version": "v0.1.0"
+    "tool-version": "v0.2.0"
 }
