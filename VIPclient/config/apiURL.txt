@@ -1,0 +1,1 @@
+http://vip.creatis.insa-lyon.fr/vip-1.24-test/rest
