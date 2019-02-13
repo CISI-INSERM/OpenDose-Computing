@@ -184,13 +184,13 @@ public class OpenDoseClient {
                         // setup and launch execution
                         execution.setInputValues(inputValues);
                         execution.setName(executionName);
-                        /*try {
+                        try {
                             execution = vipApi.initExecution(execution);
                         } catch (ApiException e) {
                             e.printStackTrace();
                         }
                         jobIdentifier = execution.getIdentifier();
-                        System.out.println(jobIdentifier);*/
+                        System.out.println(jobIdentifier);
                         nowDate = Calendar.getInstance().getTime();
                         nowFormatted = daytime.format(nowDate);
                         writer.write(nowFormatted + " : " + executionName + " - " + jobIdentifier + "\n");
@@ -213,13 +213,13 @@ public class OpenDoseClient {
                 // setup and launch execution
                 execution.setInputValues(inputValues);
                 execution.setName(executionName);
-                /*try {
+                try {
                     execution = vipApi.initExecution(execution);
                 } catch (ApiException e) {
                     e.printStackTrace();
                 }
                 jobIdentifier = execution.getIdentifier();
-                System.out.println(jobIdentifier);*/
+                System.out.println(jobIdentifier);
                 nowDate= Calendar.getInstance().getTime();
                 nowFormatted  = daytime.format(nowDate);
                 writer.write(nowFormatted + " : " + executionName + " - " + jobIdentifier + "\n");
