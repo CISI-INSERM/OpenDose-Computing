@@ -81,5 +81,12 @@
 	],
     "name": "GateCLforOpenDose", 
     "schema-version": "0.5", 
-    "tool-version": "v0.2.0"
+    "tool-version": "v0.2.0",
+	"tags": {
+        "domain": [
+            "GATE",
+            "dosimetry",
+			"nuclear medicine"
+			]
+    }
 }
