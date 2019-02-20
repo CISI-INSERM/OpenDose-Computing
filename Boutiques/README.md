@@ -9,3 +9,5 @@ The descriptor command line:
 - packages outputs
 
 An example of possible input values is shown in file **input_example.JSON**
+
+License: [Creative Commons Attribution 4.0 International](http://creativecommons.org/licenses/by/4.0/legalcode)
