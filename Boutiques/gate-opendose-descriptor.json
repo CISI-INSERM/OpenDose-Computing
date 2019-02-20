@@ -1,7 +1,7 @@
 {
+    "author": "Gilles Mathieu, using GATE application", 
     "command-line": "unzip [INDATA]; source [GATERELEASEPATH]/env.sh [GATERELEASEPATH]; [GATERELEASEPATH]/shared_libs/ld-linux-x86-64.so.2 --library-path [GATERELEASEPATH]/root/lib:[GATERELEASEPATH]/shared_libs/ [GATERELEASEPATH]/Gate -a [Source_ID,[ORGANID]][particle,[PARTICLETYPE]][energy,[ENERGY]][nb,[NBPRIMARIES]] [MACFILE] > output.log;  tar czf [RESULTS] ./output output.log", 
-
-    "description": "tool description", 
+    "description": "Descriptor for the GATE command with input parameters, used for import in VIP via Boutiques", 
     "error-codes": [
         {
             "code": 1, 
@@ -10,55 +10,55 @@
     ], 
     "inputs": [
         {
+            "command-line-flag": "", 
+            "command-line-flag-separator": "", 
             "id": "gatereleasepath", 
             "name": "Path to the Gate Release used by the application", 
             "optional": false, 
             "type": "String", 
-			"command-line-flag": "",
-			"command-line-flag-separator": "",
             "value-key": "[GATERELEASEPATH]"
-        },
+        }, 
         {
             "id": "indata", 
             "name": "LFN of the archive containing all input data", 
             "optional": false, 
             "type": "File", 
             "value-key": "[INDATA]"
-        },
-		{
+        }, 
+        {
+            "command-line-flag": "", 
+            "command-line-flag-separator": "", 
             "id": "organid", 
             "name": "Organ ID ref to the organs table", 
             "optional": false, 
             "type": "String", 
-			"command-line-flag": "",
-			"command-line-flag-separator": "",
             "value-key": "[ORGANID]"
         }, 
         {
+            "command-line-flag": "", 
+            "command-line-flag-separator": "", 
             "id": "particletype", 
             "name": "Type of Particle to simulate", 
             "optional": false, 
             "type": "String", 
-			"command-line-flag": "",
-			"command-line-flag-separator": "",
             "value-key": "[PARTICLETYPE]"
         }, 
         {
+            "command-line-flag": "", 
+            "command-line-flag-separator": "", 
             "id": "energy", 
             "name": "The level of energy to simulate", 
             "optional": false, 
             "type": "String", 
-			"command-line-flag": "",
-			"command-line-flag-separator": "",
             "value-key": "[ENERGY]"
         }, 
         {
+            "command-line-flag": "", 
+            "command-line-flag-separator": "", 
             "id": "nbprimaries", 
             "name": "The number of primaries to simulate", 
             "optional": false, 
             "type": "String", 
-			"command-line-flag": "",
-			"command-line-flag-separator": "",
             "value-key": "[NBPRIMARIES]"
         }, 
         {
@@ -69,24 +69,21 @@
             "value-key": "[MACFILE]"
         }
     ], 
-	"output-files":[
-		{
-			"id" : "results",
-			"name" : "results",
-			"description" : "archive of the output folder containing execution results, and the output of the command",
-			"path-template" : "OpenDose_[ORGANID]_[PARTICLETYPE]_[ENERGY]_[NBPRIMARIES].tar.gz",
-			"optional": false,
-			"value-key" : "[RESULTS]"
-		}
-	],
     "name": "GateCLforOpenDose", 
+    "output-files": [
+        {
+            "description": "archive of the output folder containing execution results, and the output of the command", 
+            "id": "results", 
+            "name": "results", 
+            "optional": false, 
+            "path-template": "OpenDose_[ORGANID]_[PARTICLETYPE]_[ENERGY]_[NBPRIMARIES].tar.gz", 
+            "value-key": "[RESULTS]"
+        }
+    ], 
     "schema-version": "0.5", 
-    "tool-version": "v0.2.0",
-	"tags": {
-        "domain": [
-            "GATE",
-            "dosimetry",
-			"nuclear medicine"
-			]
-    }
+    "tags": {
+        "application": "GATE", 
+        "domain": "nuclear medicine"
+    }, 
+    "tool-version": "v0.2.0"
 }
