@@ -1,0 +1,9 @@
+{
+	"gatereleasepath":	"/gate/gate_8.2-install/bin",
+	"indata":	"./OpenDoseInputData2018-11-14.zip",
+	"organid": 		"95",
+	"particletype":	"gamma",
+	"energy":		"0.005",
+	"nbprimaries":	"1000",
+	"macfile":		"./mac/main_AF.mac"
+}
