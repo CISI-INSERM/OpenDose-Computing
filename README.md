@@ -1,9 +1,10 @@
 # OpenDose-Computing: producing OpenDose data on the Grid
 
-This repository contains source code, documentation and examples for command line applications to run data production for the [OpenDose collaboration](https://doi.org/10.1016/j.ejmp.2017.09.081), using GATE on the EGI Infrastructure.
+This repository contains source code, documentation and examples for command line applications to run data production for the [OpenDose collaboration](https://doi.org/10.1016/j.ejmp.2017.09.081), using GATE on various distributed Infrastructures.
 
-- **/Boutiques** contains GateCLforOpenDose application descriptor
-- **/VIPclient** contains source code and examples for using the application in command line on client side.
+- **/Boutiques** contains GateCLforOpenDose application descriptors and input examples
+- **/VIPclient** contains source code and examples for using the application in command line on client side, using VIP to submit jobs to the EGI infrastructure.
+- **/IFB_appliance** contains scripts and HowTos to run OpenDose jobs in a VM+docker appliance on the IFB cloud infrastructure
 
 ## Contributors
 
