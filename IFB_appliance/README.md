@@ -25,7 +25,7 @@ wget https://github.com/CISI-INSERM/OpenDose-Computing/raw/master/inputs/OpenDos
 wget https://github.com/CISI-INSERM/OpenDose-Computing/raw/master/IFB_appliance/run_gate.sh
 chmod a+x run_gate.sh
 # unzip input data
-unzip OpenDose-Computing/raw/master/inputs/OpenDoseInputData2018-11-14.zip
+unzip OpenDoseInputData2018-11-14.zip
 ```
 
 ## Run OpenDose stuff
