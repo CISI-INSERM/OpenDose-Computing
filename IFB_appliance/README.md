@@ -4,10 +4,10 @@
 
 Launch CentOS appliance on Biosphère
 
-SSH to it (and su)
+SSH to it, and make yourself root (sudo su)
 
 Run configuration to make it a "Gate appliance"
-(summary in recette.sh, soon to be integrated at build time in a specific appliance)
+(summary in recette.sh, soon to be integrated at build time in a specific appliance):
 ```bash
 # add wget & unzip that are not here by default
 yum -y install wget
@@ -17,7 +17,7 @@ pip install boutiques
 # Get Gate docker image
 docker pull opengatecollaboration/gate
 ```
-Get the data (summary in get_data.sh) and the running script
+Get the data (summary in get_data.sh) and the running script:
 ```bash
 wget https://github.com/CISI-INSERM/OpenDose-Computing/raw/master/Boutiques/gate-opendose-descriptor-docker.json
 wget https://github.com/CISI-INSERM/OpenDose-Computing/raw/master/Boutiques/input_example-docker.json
@@ -32,16 +32,14 @@ unzip OpenDoseInputData2018-11-14.zip
 
 ### OPTION 1: run docker directly
 
-Run gate in the docker container with the parameter values you want:
-(1: path to Gate, 2:source_id, 3:particle, 4:energy, 5:nb_primaries, 6:macfile)
-Then package output files
+Run gate in the docker container with the parameter values you want (1: path to Gate, 2:source_id, 3:particle, 4:energy, 5:nb_primaries, 6:macfile), then package output files
 ```bash
 docker run -v /home/centos:/mnt/gate_data opengatecollaboration/gate bash -c "/mnt/gate_data/run_gate.sh /gate/gate_8.2-install/bin 95 e- 0.005 1000 main_AF.mac"
 tar czf output.tar.gz ./output output.log
 ```
 ### OPTION 2: run through boutiques
-Edit input_example-docker.json with the parameters values you want
-Then run bosh exec on the opendose descriptor with the input description file:
+
+Edit *input_example-docker.json* with the parameters values you want, then run bosh exec on the opendose descriptor with the input description file:
 ```bash
 bosh exec launch gate-opendose-descriptor-docker.json input_example-docker.json
 ```	
