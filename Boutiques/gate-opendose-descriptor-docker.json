@@ -1,6 +1,6 @@
 {
     "author": "Gilles Mathieu, using GATE application", 
-    "command-line": "./run_gate.sh [GATERELEASEPATH] [ORGANID] [PARTICLETYPE] [ENERGY]] [NBPRIMARIES]] [MACFILE];  tar czf [RESULTS] ./output output.log", 
+    "command-line": "./run_gate.sh [GATERELEASEPATH] [ORGANID] [PARTICLETYPE] [ENERGY] [NBPRIMARIES] [MACFILE];  tar czf [RESULTS] ./output output.log", 
     "description": "Descriptor for the GATE command with input parameters, used for import in a gate Docker Container", 
 	"container-image": {
 	"type": "docker",
