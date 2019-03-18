@@ -10,8 +10,8 @@ Run configuration to make it a "Gate appliance"
 (summary in recette.sh, soon to be integrated at build time in a specific appliance)
 ```bash
 # add wget & unzip that are not here by default
-yum install wget
-yum install unzip
+yum -y install wget
+yum -y install unzip
 # install Boutiques
 pip install boutiques
 # Get Gate docker image
