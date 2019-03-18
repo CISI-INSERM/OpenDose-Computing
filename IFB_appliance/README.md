@@ -34,10 +34,14 @@ unzip OpenDoseInputData2018-11-14.zip
 
 Run gate in the docker container with the parameter values you want:
 (1: path to Gate, 2:source_id, 3:particle, 4:energy, 5:nb_primaries, 6:macfile)
+Then package output files
 ```bash
 docker run -v /home/centos:/mnt/gate_data opengatecollaboration/gate bash -c "/mnt/gate_data/run_gate.sh /gate/gate_8.2-install/bin 95 e- 0.005 1000 main_AF.mac"
+tar czf output.tar.gz ./output output.log
 ```
 ### OPTION 2: run through boutiques
+Edit input_example-docker.json with the parameters values you want
+Then run bosh exec on the opendose descriptor with the input description file:
 ```bash
 bosh exec launch gate-opendose-descriptor-docker.json input_example-docker.json
 ```	
