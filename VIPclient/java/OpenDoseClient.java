@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.text.DateFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * Created by gmathieu
@@ -167,7 +170,7 @@ public class OpenDoseClient {
 
             // *********************** GATELAB ***********************************
             case "GateLab": // GateLab inputs and execution setup
-                execution.setPipelineIdentifier("GateLab/0.6.1");
+                execution.setPipelineIdentifier("GateLab/0.7.1");
                 inputValues.put("CPUestimation", cpuParam);
                 inputValues.put("ParallelizationType", "stat");
                 inputValues.put("GateRelease", gateReleasePath);
@@ -177,10 +180,12 @@ public class OpenDoseClient {
                 for (String organ_alias : organsList) {
                     // loop over all energies found in input matrix
                     for (String energy_alias : energiesList) {
+                        String seed = this.computeSeed(macFileName, organ_alias, particle, energy_alias);
                         String alias_string;
-                        alias_string = "-a [Source_ID," + organ_alias + "][particle," + particle + "][energy," + energy_alias + "][nb," + numberOfPrimaries + "]";
+                        alias_string = "-a [Source_ID," + organ_alias + "][particle," + particle + "][energy," + energy_alias + "][nb," + numberOfPrimaries + "][seed," + seed + "]";
                         inputValues.put("phaseSpace", alias_string);
                         executionName = "OpenDose_GateLab" + "_" + organ_alias + "_" + particle + "_" + energy_alias + "_" + numberOfPrimaries;
+
                         // setup and launch execution
                         execution.setInputValues(inputValues);
                         execution.setName(executionName);
@@ -232,6 +237,45 @@ public class OpenDoseClient {
         }
         writer.write("---END---");
         writer.close();
+    }
+
+    private String computeSeed (String model, String source, String particle, String energy)
+    {
+        // define numerical value corresponding to chosen model
+        // if model is AF, m=0. If model is AM, m=500
+        int m = 0;
+        Pattern regexp = Pattern.compile("AM");
+        Matcher regexm = regexp.matcher(model);
+        while(regexm.find()) {
+            m = 500;
+        }
+
+        // define numerical value corresponding to chosen particle
+        int p = 0;
+        regexp = Pattern.compile("gamma");
+        regexm = regexp.matcher(particle);
+        while(regexm.find()) {
+            p = 200;
+        }
+
+        // get numerical value from source organ ID
+        int s = Integer.parseInt(source);
+
+        // get numerical value from energy
+        double e = Double.parseDouble(energy);
+
+        // calculate seed
+        // get from energy an int value between 1 and 9999, with a minimal step of 1OO between each
+        int a = (int) (1200 * Math.log(e*1000) - 1930);
+        // get from model, particle and source organ a unique int value
+        int b = m+p+s;
+        // make a unique number from all that
+        int computedSeed = 10000*b + a;
+
+        // convert to string and return result
+        String seed_as_string = Integer.toString(computedSeed);
+        return seed_as_string;
+
     }
 
     private void getOutputs () throws ApiException
