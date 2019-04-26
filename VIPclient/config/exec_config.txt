@@ -1,11 +1,12 @@
 application GateLab
-CPUparam 1
+CPUparam 2
 organs organs_list.txt
 energies energies_list.txt
-particle e-
+particle gamma
 primaries 100000000
-input /vip/Home/OpenDose/input/Input_GateLab_AF_2019-02-12.zip
+input /vip/Home/OpenDose/input/Input_GateLab_AF_2019-04-02.zip
 gaterelease /cvmfs/biomed.egi.eu/vip/gate/gate_release_8.1.p01_52f1dd0
 macfile ./mac/main_AF.mac
-reportdir /home/gate/opendose/tests2019-02/
+reportdir /home/gate/opendose/PROD_OUTPUTS/M_GateLab/
+reportfile AF_batch1.csv
 outputdir /vip/Home/OpenDose/output
