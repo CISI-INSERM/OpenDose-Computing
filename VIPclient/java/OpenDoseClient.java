@@ -127,7 +127,7 @@ public class OpenDoseClient {
         // Get model from macfilename
         String modelName = "AM";
         Pattern regexp = Pattern.compile("AF");
-        Matcher regexm = regexp.matcher(particle);
+        Matcher regexm = regexp.matcher(macFileName);
         while(regexm.find()) {
             modelName = "AF";
         }
