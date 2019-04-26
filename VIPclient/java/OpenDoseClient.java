@@ -5,11 +5,8 @@ import org.carmin.client.model.Execution;
 //import org.carmin.client.model.Path;
 import org.carmin.client.model.Pipeline;
 
-import java.io.File;
+import java.io.*;
 //import java.io.FileNotFoundException;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 //import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -117,11 +114,24 @@ public class OpenDoseClient {
         String reportDir = sconfig.next();
         sconfig.nextLine();
         sconfig.next();
+        // local file linking params with workflow id
+        String reportFile = sconfig.next();
+        sconfig.nextLine();
+        sconfig.next();
         // output directory on VIP (only used for GateCLforOpenDose)
         String outputDir = sconfig.next();
         sconfig.close();
         // path to the local log file to which we will write execution report
         String reportFilePathName = reportDir + "exec_log_"+reportDate+".txt";
+
+        // Get model from macfilename
+        String modelName = "AM";
+        Pattern regexp = Pattern.compile("AF");
+        Matcher regexm = regexp.matcher(particle);
+        while(regexm.find()) {
+            modelName = "AF";
+        }
+
 
         // build list of source organs from input data
         ArrayList<String> organsList = new ArrayList<>();
@@ -147,6 +157,8 @@ public class OpenDoseClient {
             System.out.println("unable to create local log file");
             e.printStackTrace();
         }
+        String reportFileCompletePath = reportDir + reportFile;
+        FileWriter clientReportFileWriter = new FileWriter(reportFileCompletePath, true);
 
         // ********** INITIALIZE LOCAL LOG FILE ***********
         FileWriter writer = new FileWriter(clientExecutionLog);
@@ -170,7 +182,7 @@ public class OpenDoseClient {
 
             // *********************** GATELAB ***********************************
             case "GateLab": // GateLab inputs and execution setup
-                execution.setPipelineIdentifier("GateLab/0.7.1");
+                execution.setPipelineIdentifier("GateLab/0.7.2");
                 inputValues.put("CPUestimation", cpuParam);
                 inputValues.put("ParallelizationType", "stat");
                 inputValues.put("GateRelease", gateReleasePath);
@@ -199,6 +211,7 @@ public class OpenDoseClient {
                         nowDate = Calendar.getInstance().getTime();
                         nowFormatted = daytime.format(nowDate);
                         writer.write(nowFormatted + " : " + executionName + " - " + jobIdentifier + "\n");
+                        clientReportFileWriter.write (modelName + "," + organ_alias + "," + particle + "," + energy_alias + "," + numberOfPrimaries + "," + seed + "," + cpuParam + "," + jobIdentifier + "\n");
                         System.out.println(executionName);
                     }
                 }
@@ -237,6 +250,7 @@ public class OpenDoseClient {
         }
         writer.write("---END---");
         writer.close();
+        clientReportFileWriter.close();
     }
 
     private String computeSeed (String model, String source, String particle, String energy)
