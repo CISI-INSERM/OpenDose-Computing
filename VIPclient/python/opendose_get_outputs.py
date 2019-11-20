@@ -3,6 +3,7 @@ import pandas
 from datetime import datetime
 import concurrent.futures
 import configparser
+import os
 
 
 def downloadFile(vipPath, localPath, logline, logfile, errorlogfile, wID):
@@ -16,8 +17,12 @@ def downloadFile(vipPath, localPath, logline, logfile, errorlogfile, wID):
 	# model,source,particle,energy,primaries,seed,cpuParam,workflowID,filepath_on_vip,local_file_name,download_date
 	download_result = vip.download (vipPath, localPath)
 	if  download_result == True :
-		print (wID + ": download successful on " + current_date_string)
-		logfile.write(logline + "," + local_file_name + "," + current_date_string+ "\n")
+		if os.path.getsize(localPath) > 1000 :
+			print (wID + ": download successful on " + current_date_string + " - (file: " + localPath + ")")
+			logfile.write(logline + "," + local_file_name + "," + current_date_string+ "\n")
+		else :
+			print (wID + ": download error : corrupt file (file name: " + localPath + ")")
+			errorlogfile.write(logline + "," + current_date_string+ "\n")
 	else :
 		print (wID + ": download error")
 		errorlogfile.write(logline + "," + current_date_string+ "\n")
@@ -25,7 +30,7 @@ def downloadFile(vipPath, localPath, logline, logfile, errorlogfile, wID):
 
 # Read config file
 config = configparser.RawConfigParser()
-config.read('get_outputs.cfg')
+config.read('config/get_outputs.cfg')
 
 # setup API key from config file where it is defined
 apiKey = config.get('auth', 'ApiKey')
