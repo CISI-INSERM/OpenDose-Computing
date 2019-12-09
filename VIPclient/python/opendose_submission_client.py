@@ -4,6 +4,8 @@ import random
 import sched
 import configparser
 import pandas as pd
+import math
+import re
 
 # get init values from config file
 config = configparser.RawConfigParser()	
@@ -44,6 +46,44 @@ def getNextJob(jobList):
 
 def saveJobList(jobList, jobFile):
     jobList.to_csv(jobFile, index=None)
+def computeSeed (model, source, particle, energy) :
+	# This function computes a seed for Opendose Gate simulations, by combining
+	# numerical values extracted from the simulation input parameters.
+	# This ensures all simulations have a different seed, and that there is 
+	# enough gaps between seeds to guarantee that subjobs (splitted by GateLab)
+	# also have a different seed too.
+
+	# define numerical value corresponding to chosen model
+    # if model is AF (adult female), m=0. If model is AM (adult male), m=500
+	m = 0
+	mregex = re.compile('AM')
+	if mregex.search(model) :
+		m = 500
+
+	# define numerical value corresponding to chosen particle
+	# if particle is an electron, p = 0. If particle is a photon, p=200. 
+	p = 0
+	pregex = re.compile('gamma')
+	if pregex.search(particle) :
+		p = 200
+
+	# get numerical value from source organ ID
+	s = int(source)
+	# get numerical value from source energy
+	e = float(energy)
+	
+	# calculate seed
+	# get from energy an int value between 1 and 9999, with a minimal step of 1OO between each
+	a = int(1200 * math.log(e*1000) - 1930)
+	# get from model, particle and source organ a unique int value
+	b = m+p+s;
+	
+	# make a unique number from all that
+	computedSeed = 10000*b + a;
+	# convert to string and return result
+	seed_as_string = str(computedSeed)
+	return seed_as_string		
+
 
 
 def launchExecution(textToSearch):
