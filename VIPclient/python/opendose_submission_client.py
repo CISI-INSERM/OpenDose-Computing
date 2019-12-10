@@ -135,7 +135,6 @@ def startJobIfNecessary(joblist, jobfile):
         else:
             print("Starting a job")
             workflowID = launchExecution(job)
-            workflowID = 'toto-1337'
             # set the job status to submitted with a timestamp and set its workflowID
             joblist = setJobSubmitted(joblist, job, workflowID)
     # save joblist to file before exiting
