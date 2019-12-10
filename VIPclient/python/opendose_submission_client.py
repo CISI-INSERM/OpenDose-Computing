@@ -14,39 +14,48 @@ apiKey = config.get('application', 'apikey')
 gaterelease = config.get('application', 'gaterelease')
 application = config.get('application', 'application')
 CPUparam = config.get('application', 'CPUparam')
-input = config.get('inputs', 'input')
-organs =  config.get('inputs', 'organs')
-energies = config.get('inputs', 'energies')
-particle = 	config.get('inputs', 'particle')
-primaries = config.get('inputs', 'primaries')
+gateinput = config.get('inputs', 'input')
 macfile = config.get('inputs', 'macfile')
 outputdir = config.get('inputs', 'outputdir')
-reportdir = config.get('reporting', 'reportdir')
-reportfile = config.get('reporting', 'reportfile')
+jobfile = config.get('jobs', 'jobfile')
+
 # init stuff
-# vip.setApiKey(apiKey)
-# maxExecsNb = 2
-# currentJobs = {}
-# nextIndexToLaunch = 0
+vip.setApiKey(apiKey)
+maxExecsNb = 2 # should be from the config file no ?
 
 # methods
-def readJobList(jobFile):
-    jobList = pd.read_csv(jobFile)
-    return jobList
+def readJobList(jobfile):
+    joblist = pd.read_csv(jobfile)
+    return joblist
 
-def updateJobStatus(jobList, workflowID, status):
-    # (0: not submitted, 1: running, 2: finished, 3: downloaded)
-    jobList.loc[jobList['workflowID']==workflowID,["status"]] = status
-    return jobList
+def setJobSubmitted(joblist, job, workflowID):
+    # set the job status to submitted with a timestamp and set its workflowID
+    datetime = time.strftime('%d-%m-%Y %H:%M')
+    joblist.loc[job.Index, ['workflowID']] = workflowID
+    joblist.loc[job.Index, ['submitted']] = datetime
+    return joblist
 
-def getNextJob(jobList):
-    for job in jobList.itertuples():
-        if job.status == 0:
+def setJobFinished(joblist, workflowID):
+    # set the job status to finished with a timestamp
+    datetime = time.strftime('%d-%m-%Y %H:%M')
+    joblist.loc[joblist['workflowID']==workflowID,["finished"]] = datetime
+    return joblist
+
+def getNextJob(joblist):
+    # return the first job in the list with status not submitted (0)
+    for job in joblist.itertuples():
+        if job.submitted == 0:
             return job
+    return False
 
-def saveJobList(jobList, jobFile):
-    jobList.to_csv(jobFile, index=None)
+def saveJobList(joblist, jobfile):
+    # save the joblist to a file
+    joblist.to_csv(jobfile, index=None)
+
 def computeSeed (model, source, particle, energy) :
+    # do we need this function here ?
+    # if all is simulations parameters are pre-calculated and in the joblist CSV we don't need it here
+
 	# This function computes a seed for Opendose Gate simulations, by combining
 	# numerical values extracted from the simulation input parameters.
 	# This ensures all simulations have a different seed, and that there is 
@@ -85,10 +94,12 @@ def computeSeed (model, source, particle, energy) :
 	return seed_as_string		
 
 
-
-def launchExecution(textToSearch):
-
-    datetime = time.strftime('%d-%m-%Y %H-%M')
+def launchExecution(job):
+    # job looks like this:
+    # Pandas(Index=0, model='AF', source=61, particle='gamma', energy=0.2, primaries=100000000, seed=2614427, cpuParam=2, workflowID='workflow-mBt3pB', submitted=0, finished=0, downloaded=0)
+    # you can access model with simply job.model
+    # to complete...
+    datetime = time.strftime('%d-%m-%Y %H:%M')
     executionName = "test opendose client " + datetime
 
     result = vip.init_exec('GrepTest/2.0', executionName, {'results-directory':"/vip/Home", 'text':textToSearch,'file':"/vip/Carmin (group)/lorem_ipsum.txt"})
@@ -96,58 +107,53 @@ def launchExecution(textToSearch):
     print ("job id : {}".format(result))
 
 
-def handleExecutions(textsToSearch):
-    while startJobIfNecessary(textsToSearch):
-        time.sleep(60)
-    
-
-
-def startJobIfNecessary(textsToSearch):
+def startJobIfNecessary(joblist, jobfile):
     # main loop
-    global nextIndexToLaunch
-    runningExecs = getRunningExecs()
-    runningExecsNb = len(runningExecs)
-    print("There are {} running jobs" .format(runningExecsNb))
-    for i in range(maxExecsNb - runningExecsNb):
-        if nextIndexToLaunch >= len(textsToSearch):
-            print("No more job to launch, it's over")
-            return False
+    n_jobs = 0
+    max_jobs = 25
 
-        print("Starting a job")
-        launchExecution(textsToSearch[nextIndexToLaunch])
-        nextIndexToLaunch += 1
-
-    return True
-
-        
-
-def getRunningExecs():
-    runningExecs = []
+    # get list of jobs on vip
     execList = vip.list_executions()
     for anExec in execList:
         if anExec['status'] == "Running":
-            runningExecs.append(anExec)
-    return runningExecs
+            n_jobs += 1
+        if anExec['status'] == "Finished":
+            workflowID = anExec['workflowID']
+            status = "Finished"
+            # set the job status to finished with a timestamp
+            joblist = setJobFinished(joblist, workflowID)
+    print("There are {} running jobs" .format(n_jobs))
 
-	
-	
+    # submit new jobs
+    for i in range(max_jobs - n_jobs):
+        job = getNextJob(joblist)
+        if job == False:
+            print("No more job to launch, it's over")
+            # save joblist to file before exiting
+            saveJobList(joblist, jobfile)
+            return False
+        else:
+            print("Starting a job")
+            workflowID = launchExecution(job)
+            workflowID = 'toto-1337'
+            # set the job status to submitted with a timestamp and set its workflowID
+            joblist = setJobSubmitted(joblist, job, workflowID)
+    # save joblist to file before exiting
+    saveJobList(joblist, jobfile)
+    return True
 
-print (outputdir)
-# test script
 
-testWords = ["sed", "Donec", "max", "vitae", "dign", "wroooooooong", "ipsum", "nisi"]
-#handleExecutions(testWords)
+def handleExecutions(joblist, jobfile):
+    while startJobIfNecessary(joblist, jobfile):
+        time.sleep(60)
+
+
+# main program
+print(jobfile, macfile)
 
 # read job list from CSV
-jobList = readJobList("~/Downloads/AF_batch.csv")
+joblist = readJobList(jobfile)
 
-# get next job to run
-job = getNextJob(jobList)
+# main loop
+handleExecutions(joblist, jobfile)
 
-# update the job status after submission or completion 
-# (0: not submitted, 1: running, 2: finished, 3: downloaded)
-workflowID = job.workflowID
-jobList = updateJobStatus(jobList, workflowID, 1)
-
-# save job list to CSV
-saveJobList(jobList, "~/Downloads/AF_batch.csv")
