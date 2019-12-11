@@ -35,11 +35,11 @@ def setJobSubmitted(joblist, job, workflowID):
     joblist.loc[job.Index, ['submitted']] = datetime
     return joblist
 
-def setJobFinished(joblist, workflowID):
-    # set the job status to finished with a timestamp
-    datetime = time.strftime('%d-%m-%Y %H:%M')
-    joblist.loc[joblist['workflowID']==workflowID,["finished"]] = datetime
-    return joblist
+# def setJobFinished(joblist, workflowID):
+#     # set the job status to finished with a timestamp
+#     datetime = time.strftime('%d-%m-%Y %H:%M')
+#     joblist.loc[joblist['workflowID']==workflowID,["finished"]] = datetime
+#     return joblist
 
 def getNextJob(joblist):
     # return the first job in the list with status not submitted (0)
@@ -117,11 +117,12 @@ def startJobIfNecessary(joblist, jobfile):
     for anExec in execList:
         if anExec['status'] == "Running":
             n_jobs += 1
-        if anExec['status'] == "Finished":
-            workflowID = anExec['workflowID']
-            status = "Finished"
-            # set the job status to finished with a timestamp
-            joblist = setJobFinished(joblist, workflowID)
+        # better to check for finished jobs in another script
+        # if anExec['status'] == "Finished":
+        #     workflowID = anExec['workflowID']
+        #     status = "Finished"
+        #     # set the job status to finished with a timestamp
+        #     joblist = setJobFinished(joblist, workflowID)
     print("There are {} running jobs" .format(n_jobs))
 
     # submit new jobs
