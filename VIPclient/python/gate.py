@@ -2,12 +2,7 @@ import os
 import configparser
 import vip
 import time
-import random
-import sched
-import configparser
 import pandas as pd
-import math
-import re
 
 class Gate():
 
@@ -32,7 +27,7 @@ class Gate():
 		self.gateinput = config.get('inputs', 'input')
 		self.macfile = config.get('inputs', 'macfile')
 		self.outputdir = config.get('inputs', 'outputdir')
-		self.maxExecsNb = config.get('jobs', 'maxjobs') # should be from the config file no ? YES
+		self.maxExecsNb = int(config.get('jobs', 'maxjobs')) # should be from the config file no ? YES
 		self.jobfile = self.jobs_path #config.get('jobs', 'jobfile')
 
 	def initVIP(self):
@@ -45,8 +40,7 @@ class Gate():
 	    return joblist
 
 	def handleExecutions(self, joblist, jobfile):
-	    while self.startJobIfNecessary(joblist, jobfile):
-	        time.sleep(60)
+	    pass
 
 	def startJobIfNecessary(self, joblist, jobfile):
 		pass
