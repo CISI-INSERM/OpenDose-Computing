@@ -4,9 +4,6 @@ from gate import Gate
 from gate_lab import GateLab
 from gate_CL import GateCL
 
-
-
-
 class Portal():
 	def __init__(self):
 		print("init portal")

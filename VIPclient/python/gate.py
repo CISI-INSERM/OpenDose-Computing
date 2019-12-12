@@ -1,3 +1,4 @@
+import os
 import configparser
 import vip
 import time
@@ -9,7 +10,7 @@ import math
 import re
 
 class Gate():
-	# apiKey, gaterelease, application, CPUparam, gateinput, macfile, outputdir, jobfile = ["",]
+
 
 	def __init__(self, args):
 		self.type = args.type
@@ -17,6 +18,8 @@ class Gate():
 		self.jobs_path = args.jobs
 		self.parseConfig()
 		self.initVIP()
+		joblist = self.readJobList()
+		self.handleExecutions(joblist, self.jobfile)
 
 	# get init values from config file
 	def parseConfig(self):
@@ -29,9 +32,21 @@ class Gate():
 		self.gateinput = config.get('inputs', 'input')
 		self.macfile = config.get('inputs', 'macfile')
 		self.outputdir = config.get('inputs', 'outputdir')
-		self.jobfile = config.get('jobs', 'jobfile')
+		self.maxExecsNb = config.get('jobs', 'maxjobs') # should be from the config file no ? YES
+		self.jobfile = self.jobs_path #config.get('jobs', 'jobfile')
 
 	def initVIP(self):
 		print("apiKey : %s" % self.apiKey)
-		%vip.setApiKey(self.apiKey)
-		self.maxExecsNb = 2 # should be from the config file no ?
+		if os.environ['DEBUG_VIP'] != "1" : 
+			vip.setApiKey(self.apiKey)
+
+	def readJobList(self):
+	    joblist = pd.read_csv(self.jobfile)
+	    return joblist
+
+	def handleExecutions(self, joblist, jobfile):
+	    while self.startJobIfNecessary(joblist, jobfile):
+	        time.sleep(60)
+
+	def startJobIfNecessary(self, joblist, jobfile):
+		pass
