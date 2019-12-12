@@ -18,12 +18,24 @@ class GateLab(Gate):
 					]
 		return fakeList
 
-	def handleExecutions(self):
-		while self.startJobIfNecessary(joblist, jobfile):
-	        time.sleep(60)
+	def handleExecutions(self, joblist, jobfile):
+		notdoneyet = self.submitJobs(joblist, jobfile, 0)
+		if notdoneyet:
+			while True:
+				result = input("Jobs are launched, do you want more to be launched ? yes / no")
+				if result == "yes":
+					n_jobs = self.checkJobs(joblist, jobfile)
+					if self.maxExecsNb - n_jobs > 0:
+						notdoneyet = self.submitJobs(joblist, jobfile, n_jobs)
+					if not notdoneyet: # double negation 
+						break
+					time.sleep(60)
+				else:
+					break
+		else:
+			print("No jobs to launch in this list")
 
-	def startJob(self):
-		n_jobs = 0
+	def submitJobs(self, joblist, jobfile, n_jobs):
 		for i in range(self.maxExecsNb - n_jobs):
 			job = self.getNextJob(joblist)
 			if job == False:
@@ -38,12 +50,11 @@ class GateLab(Gate):
 				joblist = self.setJobSubmitted(joblist, job, workflowID)
 		# save joblist to file before exiting
 		self.saveJobList(joblist, jobfile)
+		# Real value is true but for testing we stop after one bunch of jobs
+		return False
 
-	def startJobIfNecessary(self, joblist, jobfile):
-		print("startJobIfNecessary")
-		# main loop
+	def checkJobs(self):
 		n_jobs = 0
-
 		# get list of jobs on vip
 		if os.environ['DEBUG_VIP'] != "1": 
 			execList = vip.list_executions()
@@ -59,22 +70,44 @@ class GateLab(Gate):
 	        #     # set the job status to finished with a timestamp
 	        #     joblist = setJobFinished(joblist, workflowID)
 		print("There are {} running jobs" .format(n_jobs))
-		# submit new jobs
-		for i in range(self.maxExecsNb - n_jobs):
-			job = self.getNextJob(joblist)
-			if job == False:
-				print("No more job to launch, it's over")
-				# save joblist to file before exiting
-				self.saveJobList(joblist, jobfile)
-				return False
-			else:
-				print("Starting a job")
-				workflowID = self.launchExecution(job)
-				# set the job status to submitted with a timestamp and set its workflowID
-				joblist = self.setJobSubmitted(joblist, job, workflowID)
-		# save joblist to file before exiting
-		self.saveJobList(joblist, jobfile)
-		return False
+		return n_jobs
+
+	# def startJobIfNecessary(self, joblist, jobfile):
+	# 	print("startJobIfNecessary")
+	# 	# main loop
+	# 	n_jobs = 0
+
+	# 	# get list of jobs on vip
+	# 	if os.environ['DEBUG_VIP'] != "1": 
+	# 		execList = vip.list_executions()
+	# 	else:
+	# 		execList = self.getFakeList()
+	# 	for anExec in execList:
+	# 		if anExec['status'] == "Running":
+	# 			n_jobs += 1
+	#         # better to check for finished jobs in another script
+	#         # if anExec['status'] == "Finished":
+	#         #     workflowID = anExec['workflowID']
+	#         #     status = "Finished"
+	#         #     # set the job status to finished with a timestamp
+	#         #     joblist = setJobFinished(joblist, workflowID)
+	# 	print("There are {} running jobs" .format(n_jobs))
+	# 	# submit new jobs
+	# 	for i in range(self.maxExecsNb - n_jobs):
+	# 		job = self.getNextJob(joblist)
+	# 		if job == False:
+	# 			print("No more job to launch, it's over")
+	# 			# save joblist to file before exiting
+	# 			self.saveJobList(joblist, jobfile)
+	# 			return False
+	# 		else:
+	# 			print("Starting a job")
+	# 			workflowID = self.launchExecution(job)
+	# 			# set the job status to submitted with a timestamp and set its workflowID
+	# 			joblist = self.setJobSubmitted(joblist, job, workflowID)
+	# 	# save joblist to file before exiting
+	# 	self.saveJobList(joblist, jobfile)
+	# 	return False
 	
 	def getNextJob(self, joblist):
 		# return the first job in the list with status not submitted (0)
@@ -98,6 +131,7 @@ class GateLab(Gate):
 			execID = vip.init_exec('GrepTest/2.0', executionName, {'results-directory':"/vip/Home", 'text':textToSearch,'file':"/vip/Carmin (group)/lorem_ipsum.txt"})
 		else:
 			execID = "workflow-" + str(random.randrange(1000))
+		#TODO : simulate a fake execution in a thread in a random time
 		print ("job id : {}".format(execID))
 		return execID
 

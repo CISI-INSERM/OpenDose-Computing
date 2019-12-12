@@ -6,7 +6,6 @@ import pandas as pd
 
 class Gate():
 
-
 	def __init__(self, args):
 		self.type = args.type
 		self.config_path = args.config
