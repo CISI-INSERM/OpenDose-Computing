@@ -18,7 +18,7 @@ class Gate():
 		self.parseConfig()
 		self.initVIP()
 		joblist = self.readJobList()
-		# self.handleExecutions(joblist, self.jobfile)
+		self.handleExecutions(joblist, self.jobfile)
 
 	# get init values from config file
 	def parseConfig(self):

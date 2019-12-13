@@ -1,0 +1,16 @@
+TODO : 
+supprimer type dans la ligne de commande
+déporter le parsing du fichier de config dans portal
+mettre le fichier de jobs dans le fichier de config
+remettre un checkjobs avant de soumettre les premiers jobs
+trouver la meilleure valeur pour le time sleep
+Faire la fonction checkJobs
+Il faut un thread séparé qui tourne pour vérifier la fin des jobs pour mettre à jour le status des jobs : pour le moment on met tout dans le while dans le checkJobs => checkRunningJobs, checkFinishedJobs, checkHeldJobs
+
+Mettre un lock sur le fichier csv quand on l'utilise pour éviter de lancer 2 fois les mêmes jobs. 
+
+MOI : checkHeldJobs = envoi mail si status du job est en held
+=> ajout de l'email dans le fichier de config
+=> mise à jour du joblist pour ne pas spamer 
+
+MOI : faire le lock sur le ficher csv pour éviter une double soumission

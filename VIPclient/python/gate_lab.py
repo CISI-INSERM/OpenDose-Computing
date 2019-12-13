@@ -51,6 +51,7 @@ class GateLab(Gate):
 			else:
 				print("Starting a job")
 				workflowID = self.launchExecution(job)
+				#TODO : add a test if the launch has failed => do not change the job status
 				# set the job status to submitted with a timestamp and set its workflowID
 				joblist = self.setJobSubmitted(joblist, job, workflowID)
 		# save joblist to file before exiting
@@ -62,6 +63,7 @@ class GateLab(Gate):
 		n_jobs = 0
 		# get list of jobs on vip
 		if os.environ['DEBUG_VIP'] != "1": 
+			# retrieve workflowIDs
 			execList = vip.list_executions()
 		else:
 			execList = self.getFakeList()
@@ -74,8 +76,21 @@ class GateLab(Gate):
 	        #     status = "Finished"
 	        #     # set the job status to finished with a timestamp
 	        #     joblist = setJobFinished(joblist, workflowID)
+	        #TODO : check if a job is in held => change status at held in joblist + send a mail
 		print("There are {} running jobs" .format(n_jobs))
 		return n_jobs
+
+	def checkHeldJobs(self):
+		held_jobs = []
+		if os.environ['DEBUG_VIP'] != "1": 
+			# retrieve workflowIDs
+			execList = vip.list_executions()
+		else:
+			execList = self.getFakeList()
+		for anExec in execList:
+			if anExec['status'] == "Held":
+				held_jobs.append(anExec['workflowID'])
+		
 
 	
 	def getNextJob(self, joblist):
