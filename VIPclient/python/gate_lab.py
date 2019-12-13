@@ -29,11 +29,16 @@ class GateLab(Gate):
 		while notdoneyet:
 			result = input("Jobs are launched, do you want more to be launched ? yes / no\n")
 			if result == "yes":
-				n_jobs = self.checkJobs()
+				# check if there is a free slot on VIP
+				n_jobs = self.checkRunningJobs()
 				if self.maxExecsNb - n_jobs > 0:
 					notdoneyet = self.submitJobs(joblist, jobfile, n_jobs)
 				if not notdoneyet: # double negation 
 					break
+				# check if jobs are finished
+				self.checkFinishedJobs(joblist, jobfile)
+				# check if jobs are held
+				self.checkHeldJobs(joblist, jobfile)
 				time.sleep(5)
 			else:
 				break
@@ -59,7 +64,7 @@ class GateLab(Gate):
 		# Real value is true but for testing we stop after one bunch of jobs
 		return True
 
-	def checkJobs(self):
+	def checkRunningJobs(self):
 		n_jobs = 0
 		# get list of jobs on vip
 		if os.environ['DEBUG_VIP'] != "1": 
@@ -70,28 +75,46 @@ class GateLab(Gate):
 		for anExec in execList:
 			if anExec['status'] == "Running":
 				n_jobs += 1
-	        # better to check for finished jobs in another script
-	        # if anExec['status'] == "Finished":
-	        #     workflowID = anExec['workflowID']
-	        #     status = "Finished"
-	        #     # set the job status to finished with a timestamp
-	        #     joblist = setJobFinished(joblist, workflowID)
-	        #TODO : check if a job is in held => change status at held in joblist + send a mail
 		print("There are {} running jobs" .format(n_jobs))
 		return n_jobs
 
-	def checkHeldJobs(self):
-		held_jobs = []
+	def checkFinishedJobs(self, joblist, jobfile):
+		n_jobs = 0
+		# get list of jobs on vip
 		if os.environ['DEBUG_VIP'] != "1": 
 			# retrieve workflowIDs
 			execList = vip.list_executions()
 		else:
 			execList = self.getFakeList()
-		for anExec in execList:
-			if anExec['status'] == "Held":
-				held_jobs.append(anExec['workflowID'])
-		
+		# loop on the joblist of submitted and not finished jobs
+		for job in joblist.itertuples():
+			if (job.submitted != "0") and (job.finished == "0"):
+				workflowID = job.workflowID
+				for anExec in execList:
+					if (anExec['status'] == "Finished") and (anExec['workflowID'] == workflowID):
+						n_jobs += 1
+						# set the job status to finished with a timestamp
+						joblist = setJobFinished(joblist, workflowID)
+		print("There are {} finished jobs" .format(n_jobs))
 
+	def checkHeldJobs(self, joblist, jobfile):
+		n_jobs = 0
+		if os.environ['DEBUG_VIP'] != "1": 
+			# retrieve workflowIDs
+			execList = vip.list_executions()
+		else:
+			execList = self.getFakeList()
+		# loop on the joblist of submitted and not finished jobs
+		for job in joblist.itertuples():
+			if (job.submitted != "0") and (job.finished == "0"):
+				workflowID = job.workflowID
+				for anExec in execList:
+					if (anExec['status'] == "Held") and (anExec['workflowID'] == workflowID):
+						n_jobs += 1
+						# set the job status finished to held
+						joblist = setJobHeld(joblist, workflowID)
+		print("There are {} held jobs" .format(n_jobs))
+		#TODO : check if a job is in held => change status at held in joblist + send a mail	
 	
 	def getNextJob(self, joblist):
 		# return the first job in the list with status not submitted (0)
@@ -124,6 +147,17 @@ class GateLab(Gate):
 		datetime = time.strftime('%d-%m-%Y %H:%M')
 		joblist.loc[job.Index, ['workflowID']] = workflowID
 		joblist.loc[job.Index, ['submitted']] = datetime
+		return joblist
+
+	def setJobFinished(self, joblist, workflowID):
+		# set the job status to finished with a timestamp
+		datetime = time.strftime('%d-%m-%Y %H:%M')
+		joblist.loc[joblist['workflowID']==workflowID,["finished"]] = datetime
+		return joblist
+
+	def setJobHeld(self, joblist, workflowID):
+		# set the job status to held
+		joblist.loc[joblist['workflowID']==workflowID,["finished"]] = "Held"
 		return joblist
 
 	def handler(self, signum, frame):
