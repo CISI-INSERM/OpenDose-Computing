@@ -6,10 +6,10 @@ from gate_CL import GateCL
 
 class Portal():
 	def __init__(self):
-		print("init portal")
+		pass
 
 	def parseParams(self):
-		print("parse params")
+		print("Portal :: parse params")
 		# Prend 3 params en entrée : fichier config, fichier csv, LAB / CL
 		parser = argparse.ArgumentParser()
 		parser.add_argument("--config", "-C", help="path to the configuration file in cfg format", type=str)
@@ -18,7 +18,6 @@ class Portal():
 		return parser.parse_args()
 
 	def launchGate(self, args):
-		print("launch gate class")
 		if args.type == "CL":
 			batch = GateCL(args)
 		elif args.type == "LAB":

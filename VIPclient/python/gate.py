@@ -3,17 +3,22 @@ import configparser
 import vip
 import time
 import pandas as pd
+import numpy as np
+import signal
 
 class Gate():
 
 	def __init__(self, args):
+		# Interruption signal handler
+		signal.signal(signal.SIGINT, self.handler)
+		# Arguments
 		self.type = args.type
 		self.config_path = args.config
 		self.jobs_path = args.jobs
 		self.parseConfig()
 		self.initVIP()
 		joblist = self.readJobList()
-		self.handleExecutions(joblist, self.jobfile)
+		# self.handleExecutions(joblist, self.jobfile)
 
 	# get init values from config file
 	def parseConfig(self):
@@ -30,12 +35,12 @@ class Gate():
 		self.jobfile = self.jobs_path #config.get('jobs', 'jobfile')
 
 	def initVIP(self):
-		print("apiKey : %s" % self.apiKey)
+		print("Gate :: apiKey : %s" % self.apiKey)
 		if os.environ['DEBUG_VIP'] != "1" : 
 			vip.setApiKey(self.apiKey)
 
 	def readJobList(self):
-	    joblist = pd.read_csv(self.jobfile)
+	    joblist = pd.read_csv(self.jobfile) # , dtype={'submitted': int}
 	    return joblist
 
 	def handleExecutions(self, joblist, jobfile):
@@ -43,3 +48,7 @@ class Gate():
 
 	def startJobIfNecessary(self, joblist, jobfile):
 		pass
+
+	def handler(self, signum, frame):
+		pass
+

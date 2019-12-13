@@ -2,8 +2,12 @@ from gate import Gate
 import os
 import time
 import random
+import signal
 
 class GateLab(Gate):
+
+	notdoneyet = True
+	exit_message = "No jobs to launch in this list, safe exit"
 
 	def __init__(self, args):
 		Gate.__init__(self, args)
@@ -19,21 +23,22 @@ class GateLab(Gate):
 		return fakeList
 
 	def handleExecutions(self, joblist, jobfile):
+		global notdoneyet
 		notdoneyet = self.submitJobs(joblist, jobfile, 0)
-		if notdoneyet:
-			while True:
-				result = input("Jobs are launched, do you want more to be launched ? yes / no")
-				if result == "yes":
-					n_jobs = self.checkJobs(joblist, jobfile)
-					if self.maxExecsNb - n_jobs > 0:
-						notdoneyet = self.submitJobs(joblist, jobfile, n_jobs)
-					if not notdoneyet: # double negation 
-						break
-					time.sleep(60)
-				else:
+		# if notdoneyet:
+		while notdoneyet:
+			result = input("Jobs are launched, do you want more to be launched ? yes / no\n")
+			if result == "yes":
+				n_jobs = self.checkJobs()
+				if self.maxExecsNb - n_jobs > 0:
+					notdoneyet = self.submitJobs(joblist, jobfile, n_jobs)
+				if not notdoneyet: # double negation 
 					break
+				time.sleep(5)
+			else:
+				break
 		else:
-			print("No jobs to launch in this list")
+			self.exitApplication()
 
 	def submitJobs(self, joblist, jobfile, n_jobs):
 		for i in range(self.maxExecsNb - n_jobs):
@@ -51,7 +56,7 @@ class GateLab(Gate):
 		# save joblist to file before exiting
 		self.saveJobList(joblist, jobfile)
 		# Real value is true but for testing we stop after one bunch of jobs
-		return False
+		return True
 
 	def checkJobs(self):
 		n_jobs = 0
@@ -72,47 +77,11 @@ class GateLab(Gate):
 		print("There are {} running jobs" .format(n_jobs))
 		return n_jobs
 
-	# def startJobIfNecessary(self, joblist, jobfile):
-	# 	print("startJobIfNecessary")
-	# 	# main loop
-	# 	n_jobs = 0
-
-	# 	# get list of jobs on vip
-	# 	if os.environ['DEBUG_VIP'] != "1": 
-	# 		execList = vip.list_executions()
-	# 	else:
-	# 		execList = self.getFakeList()
-	# 	for anExec in execList:
-	# 		if anExec['status'] == "Running":
-	# 			n_jobs += 1
-	#         # better to check for finished jobs in another script
-	#         # if anExec['status'] == "Finished":
-	#         #     workflowID = anExec['workflowID']
-	#         #     status = "Finished"
-	#         #     # set the job status to finished with a timestamp
-	#         #     joblist = setJobFinished(joblist, workflowID)
-	# 	print("There are {} running jobs" .format(n_jobs))
-	# 	# submit new jobs
-	# 	for i in range(self.maxExecsNb - n_jobs):
-	# 		job = self.getNextJob(joblist)
-	# 		if job == False:
-	# 			print("No more job to launch, it's over")
-	# 			# save joblist to file before exiting
-	# 			self.saveJobList(joblist, jobfile)
-	# 			return False
-	# 		else:
-	# 			print("Starting a job")
-	# 			workflowID = self.launchExecution(job)
-	# 			# set the job status to submitted with a timestamp and set its workflowID
-	# 			joblist = self.setJobSubmitted(joblist, job, workflowID)
-	# 	# save joblist to file before exiting
-	# 	self.saveJobList(joblist, jobfile)
-	# 	return False
 	
 	def getNextJob(self, joblist):
 		# return the first job in the list with status not submitted (0)
 		for job in joblist.itertuples():
-			if job.submitted == 0:
+			if job.submitted == "0":
 				return job
 		return False
 
@@ -141,3 +110,12 @@ class GateLab(Gate):
 		joblist.loc[job.Index, ['workflowID']] = workflowID
 		joblist.loc[job.Index, ['submitted']] = datetime
 		return joblist
+
+	def handler(self, signum, frame):
+		print(" Interruption signal catched")
+		global notdoneyet, exit_message
+		notdoneyet = False
+		exit_message = "Safe exit"
+
+	def exitApplication(self):
+		print(exit_message)
