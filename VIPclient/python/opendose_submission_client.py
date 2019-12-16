@@ -98,13 +98,37 @@ def launchExecution(job):
     # job looks like this:
     # Pandas(Index=0, model='AF', source=61, particle='gamma', energy=0.2, primaries=100000000, seed=2614427, cpuParam=2, workflowID='workflow-mBt3pB', submitted=0, finished=0, downloaded=0)
     # you can access model with simply job.model
-    # to complete...
+    # 
+    # config is the structure that contains config params extracted from the cfg file.
+    
+    # When the function is integrated in the class structure it will look like that:
+    #gaterelease = self.gaterelease
+    #application = self.application
+    #CPUparam = self.CPUparam
+    #gateinput = self.gateinput
+    #macfile = self.macfile
+    #outputdir = self.outputdir
+    # meanwhile and for testing purpose let's just hardcode the values
+    gaterelease = "/cvmfs/biomed.egi.eu/vip/gate/gate_release_8.1.p01_52f1dd0"
+    application = "GateLab/0.7.2"
+    CPUparam = "2"
+    gateinput = "/vip/Home/OpenDose/input/Input_GateLab_AM_2019-04-02.zip"
+    macfile = "./mac/main_AM.mac"
+    outputdir = "/vip/Home/OpenDose/output"
+    
+    # build the -a [...] string passed to Gate via Gatelab through parameter "phaseSpace"
+    alias_string= "-a [Source_ID," + str(job.source) + "][particle," + str(job.particle) + "][energy," + str(job.energy) + "][nb," + str(job.primaries) + "][seed," + str(job.seed) + "]"
+    
+    executionName = "OpenDose_GateLab" + "_" + job.model + "_" + str(job.source) + "_" + str(job.particle) + "_" + str(job.energy) + "_" + str(job.primaries)
     datetime = time.strftime('%d-%m-%Y %H:%M')
-    executionName = "test opendose client " + datetime
-
-    result = vip.init_exec('GrepTest/2.0', executionName, {'results-directory':"/vip/Home", 'text':textToSearch,'file':"/vip/Carmin (group)/lorem_ipsum.txt"})
-
-    print ("job id : {}".format(result))
+    print (datetime + " - Launching execution " + executionName)
+    
+    #result = vip.init_exec('GrepTest/2.0', executionName, {'results-directory':"/vip/Home", 'text':"vitae",'file':"/vip/Carmin (group)/lorem_ipsum.txt"})
+    
+    result = vip.init_exec(application, executionName, {'CPUestimation':CPUparam, 'ParallelizationType':"stat", 'GateRelease':gaterelease, 'NumberOfParticles':job.particle, 'GateInput':gateinput, 'phaseSpace':alias_string})
+    
+    print ("execution id : " + result)
+    return result
 
 
 def startJobIfNecessary(joblist, jobfile):
