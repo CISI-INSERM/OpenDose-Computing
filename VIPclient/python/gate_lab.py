@@ -6,15 +6,18 @@ import signal
 
 class GateLab(Gate):
 
-	notdoneyet = True
+	# Time to wait in second before checking for jobs status
 	exit_message = "No jobs to launch in this list, safe exit"
 
 	def __init__(self, args):
+		self.notdoneyet = True
 		Gate.__init__(self, args)
+		print("joblist type from gate_lab : ", type(self.joblist))
+		self.handleExecutions()
 
 	def getFakeList(self):
 		fakeList = [{'workflowID': 1, 'status': "Running"},
-					{'workflowID': 2, 'status': "Finished"},
+					{'workflowID': "workflow-EPrOSZ", 'status': "Finished"},
 					{'workflowID': 3, 'status': "Pending"},
 					{'workflowID': 4, 'status': "Pending"},
 					{'workflowID': 5, 'status': "Pending"},
@@ -22,63 +25,70 @@ class GateLab(Gate):
 					]
 		return fakeList
 
-	def handleExecutions(self, joblist, jobfile):
-		global notdoneyet
-		notdoneyet = self.submitJobs(joblist, jobfile, 0)
+	def handleExecutions(self):
+		n_free_slots = 0
+		# Is it necessary to checkJobs here as we won't be able to launch several time the same jobfile ?
+		# => workflowID won't be identical in two different jobfile
+		self.tryNewSubmit()
 		# if notdoneyet:
-		while notdoneyet:
+		while self.notdoneyet:
 			result = input("Jobs are launched, do you want more to be launched ? yes / no\n")
 			if result == "yes":
 				# check if there is a free slot on VIP
-				n_jobs = self.checkRunningJobs()
-				if self.maxExecsNb - n_jobs > 0:
-					notdoneyet = self.submitJobs(joblist, jobfile, n_jobs)
-				if not notdoneyet: # double negation 
-					break
+				self.tryNewSubmit()
 				# check if jobs are finished
-				self.checkFinishedJobs(joblist, jobfile)
+				# self.checkFinishedJobs(self.joblist)
 				# check if jobs are held
-				self.checkHeldJobs(joblist, jobfile)
-				time.sleep(5)
+				# self.checkHeldJobs(self.joblist)
+				# wait before new check
+				if self.notdoneyet:
+					time.sleep(5)
 			else:
 				break
 		else:
 			self.exitApplication()
 
-	def submitJobs(self, joblist, jobfile, n_jobs):
-		for i in range(self.maxExecsNb - n_jobs):
-			job = self.getNextJob(joblist)
-			if job == False:
-				print("No more job to launch, it's over")
-				# save joblist to file before exiting
-				self.saveJobList(joblist, jobfile)
-				return False
-			else:
-				print("Starting a job")
-				workflowID = self.launchExecution(job)
-				#TODO : add a test if the launch has failed => do not change the job status
-				# set the job status to submitted with a timestamp and set its workflowID
-				joblist = self.setJobSubmitted(joblist, job, workflowID)
-		# save joblist to file before exiting
-		self.saveJobList(joblist, jobfile)
-		# Real value is true but for testing we stop after one bunch of jobs
-		return True
+	def tryNewSubmit(self):
+		n_free_slots = self.getFreeSlots()
+		if n_free_slots:
+			self.submitJobs(n_free_slots)
 
-	def checkRunningJobs(self):
+	# Retrieve running jobs and return available slots from vip list executions
+	def getFreeSlots(self):
 		n_jobs = 0
+
 		# get list of jobs on vip
 		if os.environ['DEBUG_VIP'] != "1": 
 			# retrieve workflowIDs
 			execList = vip.list_executions()
 		else:
 			execList = self.getFakeList()
+
 		for anExec in execList:
 			if anExec['status'] == "Running":
 				n_jobs += 1
-		print("There are {} running jobs" .format(n_jobs))
-		return n_jobs
 
-	def checkFinishedJobs(self, joblist, jobfile):
+		return self.maxExecsNb - n_jobs
+
+	def submitJobs(self, n_free_slots):
+		for i in range(n_free_slots):
+			job = self.getNextJob()
+			if job == False:
+				print("No more job to launch, it's over")
+				# save self.joblist to file before exiting
+				self.saveJobList()
+				# breaks jobs' execution's 
+				self.notdoneyet = false
+			else:
+				print("Starting job: ", job.workflowID)
+				workflowID = self.launchExecution(job)
+				#TODO : add a test if the launch has failed => do not change the job status
+				# set the job status to submitted with a timestamp and set its workflowID
+				self.setJobSubmitted(job, workflowID)
+		# save self.joblist to file before exiting
+		self.saveJobList()
+
+	def checkFinishedJobs(self):
 		n_jobs = 0
 		# get list of jobs on vip
 		if os.environ['DEBUG_VIP'] != "1": 
@@ -86,46 +96,56 @@ class GateLab(Gate):
 			execList = vip.list_executions()
 		else:
 			execList = self.getFakeList()
-		# loop on the joblist of submitted and not finished jobs
-		for job in joblist.itertuples():
+
+		for anExec in execList:
+			if anExec['status'] == "Finished" and self.joblist.loc[self.joblist['workflowID'] == anExec['workflowID'], ["Finished"]] == "0":
+				print("Job finished : ", self.joblist['workflowID'])
+				# set the job status to finished with a timestamp
+				# setJobFinished(anExec['workflowID'])
+
+		exit()
+
+		# loop on the self.joblist of submitted and not finished jobs
+		for job in self.joblist.itertuples():
 			if (job.submitted != "0") and (job.finished == "0"):
 				workflowID = job.workflowID
 				for anExec in execList:
 					if (anExec['status'] == "Finished") and (anExec['workflowID'] == workflowID):
 						n_jobs += 1
 						# set the job status to finished with a timestamp
-						joblist = setJobFinished(joblist, workflowID)
+						setJobFinished(workflowID)
 		print("There are {} finished jobs" .format(n_jobs))
 
-	def checkHeldJobs(self, joblist, jobfile):
+	def checkHeldJobs(self):
 		n_jobs = 0
 		if os.environ['DEBUG_VIP'] != "1": 
 			# retrieve workflowIDs
 			execList = vip.list_executions()
 		else:
 			execList = self.getFakeList()
-		# loop on the joblist of submitted and not finished jobs
-		for job in joblist.itertuples():
+		# loop on the self.joblist of submitted and not finished jobs
+		for job in self.joblist.itertuples():
 			if (job.submitted != "0") and (job.finished == "0"):
 				workflowID = job.workflowID
 				for anExec in execList:
 					if (anExec['status'] == "Held") and (anExec['workflowID'] == workflowID):
 						n_jobs += 1
 						# set the job status finished to held
-						joblist = setJobHeld(joblist, workflowID)
+						setJobHeld(self.joblist, workflowID)
 		print("There are {} held jobs" .format(n_jobs))
-		#TODO : check if a job is in held => change status at held in joblist + send a mail	
+		#TODO : check if a job is in held => change status at held in self.joblist + send a mail	
 	
-	def getNextJob(self, joblist):
+	def getNextJob(self):
 		# return the first job in the list with status not submitted (0)
-		for job in joblist.itertuples():
+		for job in self.joblist.itertuples():
 			if job.submitted == "0":
 				return job
 		return False
 
-	def saveJobList(self, joblist, jobfile):
-		# save the joblist to a file
-		joblist.to_csv(jobfile, index=None)
+	def saveJobList(self):
+		# save the self.joblist to a file
+		print("joblist type from gate_lab:saveJobList : ", type(self.joblist))
+		self.joblist.to_csv(self.jobfile, index=None)
 
 	def launchExecution(self, job):
 		# job looks like this:
@@ -142,29 +162,24 @@ class GateLab(Gate):
 		print ("job id : {}".format(execID))
 		return execID
 
-	def setJobSubmitted(self, joblist, job, workflowID):
+	def setJobSubmitted(self, job, workflowID):
 		# set the job status to submitted with a timestamp and set its workflowID
 		datetime = time.strftime('%d-%m-%Y %H:%M')
-		joblist.loc[job.Index, ['workflowID']] = workflowID
-		joblist.loc[job.Index, ['submitted']] = datetime
-		return joblist
+		self.joblist.loc[job.Index, ['workflowID']] = workflowID
+		self.joblist.loc[job.Index, ['submitted']] = datetime
 
-	def setJobFinished(self, joblist, workflowID):
+	def setJobFinished(self, workflowID):
 		# set the job status to finished with a timestamp
 		datetime = time.strftime('%d-%m-%Y %H:%M')
-		joblist.loc[joblist['workflowID']==workflowID,["finished"]] = datetime
-		return joblist
+		self.joblist.loc[self.joblist['workflowID']==workflowID,["finished"]] = datetime
 
-	def setJobHeld(self, joblist, workflowID):
+	def setJobHeld(self, workflowID):
 		# set the job status to held
-		joblist.loc[joblist['workflowID']==workflowID,["finished"]] = "Held"
-		return joblist
+		self.joblist.loc[self.joblist['workflowID']==workflowID,["finished"]] = "Held"
 
 	def handler(self, signum, frame):
 		print(" Interruption signal catched")
-		global notdoneyet, exit_message
-		notdoneyet = False
+		global exit_message
+		self.notdoneyet = False
 		exit_message = "Safe exit"
 
-	def exitApplication(self):
-		print(exit_message)

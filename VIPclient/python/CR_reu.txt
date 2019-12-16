@@ -1,7 +1,7 @@
 TODO : 
-supprimer type dans la ligne de commande
-déporter le parsing du fichier de config dans portal
-mettre le fichier de jobs dans le fichier de config
+x supprimer type dans la ligne de commande
+x déporter le parsing du fichier de config dans portal
+x mettre le fichier de jobs dans le fichier de config
 remettre un checkjobs avant de soumettre les premiers jobs
 trouver la meilleure valeur pour le time sleep
 Faire la fonction checkJobs
