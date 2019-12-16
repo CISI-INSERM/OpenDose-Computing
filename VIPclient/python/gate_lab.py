@@ -151,16 +151,27 @@ class GateLab(Gate):
 		# job looks like this:
 		# Pandas(Index=0, model='AF', source=61, particle='gamma', energy=0.2, primaries=100000000, seed=2614427, cpuParam=2, workflowID='workflow-mBt3pB', submitted=0, finished=0, downloaded=0)
 		# you can access model with simply job.model
-		# to complete...
+		gaterelease = self.gaterelease
+		application = self.application
+		CPUparam = self.CPUparam
+		gateinput = self.gateinput
+		macfile = self.macfile
+		outputdir = self.outputdir
+		# build the -a [...] string passed to Gate via Gatelab through parameter "phaseSpace"
+		alias_string= "-a [Source_ID," + str(job.source) + "][particle," + str(job.particle) + "][energy," + str(job.energy) + "][nb," + str(job.primaries) + "][seed," + str(job.seed) + "]"
+
+		executionName = "OpenDose_GateLab" + "_" + job.model + "_" + str(job.source) + "_" + str(job.particle) + "_" + str(job.energy) + "_" + str(job.primaries)
 		datetime = time.strftime('%d-%m-%Y %H:%M')
-		executionName = "test opendose client " + datetime
+		print (datetime + " - Launching execution " + executionName)
+
 		if os.environ['DEBUG_VIP'] != "1": 
-			execID = vip.init_exec('GrepTest/2.0', executionName, {'results-directory':"/vip/Home", 'text':textToSearch,'file':"/vip/Carmin (group)/lorem_ipsum.txt"})
+			execID = vip.init_exec(application, executionName, {'CPUestimation':CPUparam, 'ParallelizationType':"stat", 'GateRelease':gaterelease, 'NumberOfParticles':job.particle, 'GateInput':gateinput, 'phaseSpace':alias_string})
 		else:
 			execID = "workflow-" + str(random.randrange(1000))
 		#TODO : simulate a fake execution in a thread in a random time
-		print ("job id : {}".format(execID))
+		print ("execution id : " + execID)
 		return execID
+		
 
 	def setJobSubmitted(self, job, workflowID):
 		# set the job status to submitted with a timestamp and set its workflowID
