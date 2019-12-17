@@ -12,16 +12,15 @@ class GateLab(Gate):
 	def __init__(self, args):
 		self.notdoneyet = True
 		Gate.__init__(self, args)
-		print("joblist type from gate_lab : ", type(self.joblist))
 		self.handleExecutions()
 
 	def getFakeList(self):
-		fakeList = [{'workflowID': 1, 'status': "Running"},
-					{'workflowID': "workflow-EPrOSZ", 'status': "Finished"},
-					{'workflowID': 3, 'status': "Pending"},
-					{'workflowID': 4, 'status': "Pending"},
-					{'workflowID': 5, 'status': "Pending"},
-					{'workflowID': 6, 'status': "Pending"},
+		fakeList = [{'identifier': 1, 'status': "Running"},
+					{'identifier': "workflow-EPrOSZ", 'status': "Finished"},
+					{'identifier': 3, 'status': "held"},
+					{'identifier': 4, 'status': "Killed"},
+					{'identifier': 5, 'status': "Running"},
+					{'identifier': 6, 'status': "Running"},
 					]
 		return fakeList
 
@@ -37,7 +36,7 @@ class GateLab(Gate):
 				# check if there is a free slot on VIP
 				self.tryNewSubmit()
 				# check if jobs are finished
-				# self.checkFinishedJobs(self.joblist)
+				self.checkFinishedJobs()
 				# check if jobs are held
 				# self.checkHeldJobs(self.joblist)
 				# wait before new check
@@ -98,8 +97,14 @@ class GateLab(Gate):
 			execList = self.getFakeList()
 
 		for anExec in execList:
-			if anExec['status'] == "Finished" and self.joblist.loc[self.joblist['workflowID'] == anExec['workflowID'], ["Finished"]] == "0":
-				print("Job finished : ", self.joblist['workflowID'])
+			if anExec['status'] == "Finished":
+				# Retrive the line index in the csv where workflowID is equal to the one find as finished in the exec_list obtained from vip
+				ret = self.joblist.loc[(self.joblist['workflowID'] == anExec['identifier']), ["finished"]].values[0]
+				print(ret)
+				# df = self.joblist.loc[(self.joblist['workflowID'] == anExec['identifier']) & (self.joblist["finished"] == 0)].index.values[0]
+				# df.loc[df.index[0], 'finished'] = 1
+				# print("Finished in csv line : ", df)
+				# print("Job finished : ", self.joblist['workflowID'])
 				# set the job status to finished with a timestamp
 				# setJobFinished(anExec['workflowID'])
 
@@ -144,19 +149,18 @@ class GateLab(Gate):
 
 	def saveJobList(self):
 		# save the self.joblist to a file
-		print("joblist type from gate_lab:saveJobList : ", type(self.joblist))
 		self.joblist.to_csv(self.jobfile, index=None)
 
 	def launchExecution(self, job):
 		# job looks like this:
 		# Pandas(Index=0, model='AF', source=61, particle='gamma', energy=0.2, primaries=100000000, seed=2614427, cpuParam=2, workflowID='workflow-mBt3pB', submitted=0, finished=0, downloaded=0)
 		# you can access model with simply job.model
-		gaterelease = self.gaterelease
-		application = self.application
-		CPUparam = self.CPUparam
-		gateinput = self.gateinput
-		macfile = self.macfile
-		outputdir = self.outputdir
+		gaterelease = self.config["gaterelease"]
+		application = self.config["application"]
+		CPUparam = self.config["CPUparam"]
+		gateinput = self.config["gateinput"]
+		macfile = self.config["macfile"]
+		outputdir = self.config["outputdir"]
 		# build the -a [...] string passed to Gate via Gatelab through parameter "phaseSpace"
 		alias_string= "-a [Source_ID," + str(job.source) + "][particle," + str(job.particle) + "][energy," + str(job.energy) + "][nb," + str(job.primaries) + "][seed," + str(job.seed) + "]"
 

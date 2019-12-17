@@ -27,7 +27,6 @@ class Gate():
 
 	def readJobList(self):
 		self.joblist = pd.read_csv(self.jobfile) # , dtype={'submitted': int}
-		print("joblist type: ", type(self.joblist))
 
 	def handleExecutions(self):
 	    pass
