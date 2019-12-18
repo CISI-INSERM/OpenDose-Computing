@@ -3,6 +3,7 @@ import os
 import time
 import random
 import signal
+import numpy as np
 
 class GateLab(Gate):
 
@@ -11,6 +12,7 @@ class GateLab(Gate):
 
 	def __init__(self, args):
 		self.notdoneyet = True
+		self.wf_dico = {}
 		Gate.__init__(self, args)
 		self.handleExecutions()
 
@@ -19,8 +21,8 @@ class GateLab(Gate):
 					{'identifier': "workflow-EPrOSZ", 'status': "Finished"},
 					{'identifier': 3, 'status': "held"},
 					{'identifier': 4, 'status': "Killed"},
-					{'identifier': 5, 'status': "Running"},
-					{'identifier': 6, 'status': "Running"},
+					{'identifier': 5, 'status': "Killed"},
+					{'identifier': 6, 'status': "Killed"},
 					]
 		return fakeList
 
@@ -88,7 +90,9 @@ class GateLab(Gate):
 		self.saveJobList()
 
 	def checkFinishedJobs(self):
-		n_jobs = 0
+		# Just a short name
+		l = self.joblist
+		changed = False
 		# get list of jobs on vip
 		if os.environ['DEBUG_VIP'] != "1": 
 			# retrieve workflowIDs
@@ -97,29 +101,13 @@ class GateLab(Gate):
 			execList = self.getFakeList()
 
 		for anExec in execList:
-			if anExec['status'] == "Finished":
-				# Retrive the line index in the csv where workflowID is equal to the one find as finished in the exec_list obtained from vip
-				ret = self.joblist.loc[(self.joblist['workflowID'] == anExec['identifier']), ["finished"]].values[0]
-				print(ret)
-				# df = self.joblist.loc[(self.joblist['workflowID'] == anExec['identifier']) & (self.joblist["finished"] == 0)].index.values[0]
-				# df.loc[df.index[0], 'finished'] = 1
-				# print("Finished in csv line : ", df)
-				# print("Job finished : ", self.joblist['workflowID'])
-				# set the job status to finished with a timestamp
-				# setJobFinished(anExec['workflowID'])
+			if anExec['status'] == "Finished" and (l.loc[l['workflowID']==anExec['identifier'],["finished"]]).values[0][0] == 0:
+				print("Job id ", anExec['identifier'], " finished")
+				changed = True
+				self.setJobFinished(anExec['identifier'])
+		if changed:	
+			self.saveJobList()
 
-		exit()
-
-		# loop on the self.joblist of submitted and not finished jobs
-		for job in self.joblist.itertuples():
-			if (job.submitted != "0") and (job.finished == "0"):
-				workflowID = job.workflowID
-				for anExec in execList:
-					if (anExec['status'] == "Finished") and (anExec['workflowID'] == workflowID):
-						n_jobs += 1
-						# set the job status to finished with a timestamp
-						setJobFinished(workflowID)
-		print("There are {} finished jobs" .format(n_jobs))
 
 	def checkHeldJobs(self):
 		n_jobs = 0
