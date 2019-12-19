@@ -1,9 +1,13 @@
+from email.mime.text import MIMEText
 from gate import Gate
 import os
 import time
 import random
 import signal
 import numpy as np
+import smtplib, ssl
+import getpass
+from socket import gaierror
 
 class GateLab(Gate):
 
@@ -12,14 +16,13 @@ class GateLab(Gate):
 
 	def __init__(self, args):
 		self.notdoneyet = True
-		self.wf_dico = {}
 		Gate.__init__(self, args)
 		self.handleExecutions()
 
 	def getFakeList(self):
 		fakeList = [{'identifier': 1, 'status': "Running"},
 					{'identifier': "workflow-EPrOSZ", 'status': "Finished"},
-					{'identifier': 3, 'status': "held"},
+					{'identifier': "workflow-DaNIel", 'status': "Held"},
 					{'identifier': 4, 'status': "Killed"},
 					{'identifier': 5, 'status': "Killed"},
 					{'identifier': 6, 'status': "Killed"},
@@ -40,7 +43,7 @@ class GateLab(Gate):
 				# check if jobs are finished
 				self.checkFinishedJobs()
 				# check if jobs are held
-				# self.checkHeldJobs(self.joblist)
+				self.checkHeldJobs()
 				# wait before new check
 				if self.notdoneyet:
 					time.sleep(5)
@@ -110,24 +113,28 @@ class GateLab(Gate):
 
 
 	def checkHeldJobs(self):
-		n_jobs = 0
+		# Just a short name
+		l = self.joblist
+		changed = False
+
 		if os.environ['DEBUG_VIP'] != "1": 
 			# retrieve workflowIDs
 			execList = vip.list_executions()
 		else:
 			execList = self.getFakeList()
-		# loop on the self.joblist of submitted and not finished jobs
-		for job in self.joblist.itertuples():
-			if (job.submitted != "0") and (job.finished == "0"):
-				workflowID = job.workflowID
-				for anExec in execList:
-					if (anExec['status'] == "Held") and (anExec['workflowID'] == workflowID):
-						n_jobs += 1
-						# set the job status finished to held
-						setJobHeld(self.joblist, workflowID)
-		print("There are {} held jobs" .format(n_jobs))
-		#TODO : check if a job is in held => change status at held in self.joblist + send a mail	
-	
+
+		for anExec in execList:
+			# Here we define that if the workflow of the exec_list is Held
+			# we define the finished value of the joblist to 2
+			# this imply that we have delt with this case (email sent)
+			if anExec['status'] == "Held" and (l.loc[l['workflowID']==anExec['identifier'],["finished"]]).values[0][0] != 2:
+				print("Job id ", anExec['identifier'], " held")
+				changed = True
+				self.setJobHeld(anExec['identifier'])
+				self.sendMail(anExec['identifier'])
+		if changed:	
+			self.saveJobList()
+
 	def getNextJob(self):
 		# return the first job in the list with status not submitted (0)
 		for job in self.joblist.itertuples():
@@ -178,7 +185,43 @@ class GateLab(Gate):
 
 	def setJobHeld(self, workflowID):
 		# set the job status to held
-		self.joblist.loc[self.joblist['workflowID']==workflowID,["finished"]] = "Held"
+		self.joblist.loc[self.joblist['workflowID']==workflowID,["finished"]] = 2
+
+	# Email sending via SSL (http://zetcode.com/python/smtplib/)
+	def sendMail(self, workflowID):
+		print("Email send to ", self.config['email'])
+		smtp_server = "smtp.inserm.fr"
+		port = 587
+
+		password = getpass.getpass("Type your password and press enter : ")
+		receiver = self.config['email']
+		sender = self.config['email']
+		user = self.config['email']
+
+		msg = 	''.join(("Hi,\nYour workflow ", 
+						 workflowID,
+						 " is in held status.\n",
+						 "Regards"))
+
+		msg = MIMEText(msg)
+
+		msg['Subject'] = '[opendose] Held workflow'
+		msg['From'] = 'opendose@gatelab.com'
+		msg['To'] = receiver
+
+		# Secure SSL context
+		# Try to log in o server and send email
+		try : 
+			with smtplib.SMTP("smtp.inserm.fr", port) as server:
+			    server.starttls() # Secure the connection
+			    server.login(user, password)
+			    server.sendmail(sender, receiver, msg.as_string())
+		except Exception as e:
+			print(e)
+		finally:
+			print("Mail successfully sent to ", receiver)
+
+
 
 	def handler(self, signum, frame):
 		print(" Interruption signal catched")

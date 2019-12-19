@@ -28,6 +28,7 @@ class Portal():
 		config['gateinput'] = cfgparser.get('inputs', 'input')
 		config['macfile'] = cfgparser.get('inputs', 'macfile')
 		config['outputdir'] = cfgparser.get('inputs', 'outputdir')
+		config['email'] = cfgparser.get('inputs', 'email')
 		config['maxExecsNb'] = int(cfgparser.get('jobs', 'maxjobs')) 
 		config['jobfile'] = os.environ['OPENDOSE_PATH'] + "/" + cfgparser.get('jobs', 'jobfile')
 		return config
