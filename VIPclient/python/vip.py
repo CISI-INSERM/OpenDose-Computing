@@ -4,7 +4,7 @@ from os.path import join, dirname, exists
 
 ########################### VARIABLES & ERRORS ################################
 # -----------------------------------------------------------------------------
-__PREFIX = "https://vip.creatis.insa-lyon.fr/vip-test/rest/"
+__PREFIX = "https://vip.creatis.insa-lyon.fr/rest/"
 __apikey = None
 __headers = {'apikey': __apikey}
 
