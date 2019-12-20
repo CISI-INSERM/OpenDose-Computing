@@ -1,6 +1,8 @@
 from email.mime.text import MIMEText
 from gate import Gate
 import os
+import os.path
+from os import path
 import time
 import random
 import signal
@@ -12,7 +14,7 @@ from socket import gaierror
 class GateLab(Gate):
 
 	# Time to wait in second before checking for jobs status
-	exit_message = "No jobs to launch in this list, safe exit"
+	exit_message = "Good bye !"
 
 	def __init__(self, args):
 		self.notdoneyet = True
@@ -50,7 +52,7 @@ class GateLab(Gate):
 			else:
 				break
 		else:
-			self.exitApplication()
+			self.exitApplication("No more jobs to launch. Good bye !")
 
 	def tryNewSubmit(self):
 		n_free_slots = self.getFreeSlots()
@@ -229,3 +231,8 @@ class GateLab(Gate):
 		self.notdoneyet = False
 		exit_message = "Safe exit"
 
+
+	def exitApplication(self, msg=exit_message):
+		Gate.exitApplication(self)
+		if path.exists(self.lock_file):
+			os.remove(self.lock_file)
