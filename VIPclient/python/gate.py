@@ -16,11 +16,13 @@ class Gate():
 		# Interruption signal handler
 		signal.signal(signal.SIGINT, self.handler)
 		# Exit program handling
-		atexit.register(self.exitApplication)
+		atexit.register(self.atExit)
 		# Arguments
 		self.config = args
 		self.jobfile = self.config['jobfile']
 		self.maxExecsNb = self.config['maxExecsNb']
+		# Condition to start, false if another process is already running
+		self.go = True
 		# A joblist is linked to a specific csv file so we can make it global
 		# in the context of this execution
 		# Start
@@ -39,7 +41,7 @@ class Gate():
 			# Panda converts the cvs to data frame
 			self.joblist = pd.read_csv(self.jobfile) # , dtype={'submitted': int}
 		else:
-			self.exitApplication("The file ", self.jobfile, " is already in process")
+			self.go = False
 
 	def handleExecutions(self):
 	    pass
@@ -50,5 +52,8 @@ class Gate():
 	def handler(self, signum, frame):
 		pass
 
-	def exitApplication(self, msg=exit_message):
-		print(self.exit_message)
+	def exitMessage(self, msg=exit_message):
+		print(msg)
+
+	def atExit(self):
+		pass

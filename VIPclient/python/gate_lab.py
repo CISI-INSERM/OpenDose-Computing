@@ -13,13 +13,17 @@ from socket import gaierror
 
 class GateLab(Gate):
 
-	# Time to wait in second before checking for jobs status
 	exit_message = "Good bye !"
 
 	def __init__(self, args):
 		self.notdoneyet = True
 		Gate.__init__(self, args)
-		self.handleExecutions()
+		if self.go:
+			self.handleExecutions()
+		else:
+			# Here we precise to execute the Gate version not to remove the lock of the already running process
+			msg = "The file " + self.jobfile + " is already in process"
+			self.exitMessage(msg)
 
 	def getFakeList(self):
 		fakeList = [{'identifier': 1, 'status': "Running"},
@@ -52,7 +56,7 @@ class GateLab(Gate):
 			else:
 				break
 		else:
-			self.exitApplication("No more jobs to launch. Good bye !")
+			self.exitMessage("No more jobs to launch. Good bye !")
 
 	def tryNewSubmit(self):
 		n_free_slots = self.getFreeSlots()
@@ -232,7 +236,6 @@ class GateLab(Gate):
 		exit_message = "Safe exit"
 
 
-	def exitApplication(self, msg=exit_message):
-		Gate.exitApplication(self)
-		if path.exists(self.lock_file):
+	def atExit(self):
+		if path.exists(self.lock_file) and self.go:
 			os.remove(self.lock_file)
